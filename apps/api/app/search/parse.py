@@ -20,8 +20,8 @@ _UNVERIFIABLE = re.compile(
     r"แพ้|มังสวิรัติ|วีแกน|ฮาลาล|อาหารเจ|กินเจ|vegan|vegetarian|halal|gluten|ที่จอดรถ|อร่อย(?:ที่)?สุด|ปลอดภัย|สะอาด"
     r"|ไม่(?:เผ็ด|หวาน|มัน|เค็ม|ใส่|เอา|กิน)|งด|ยกเว้น|เปิด(?:อยู่|ตอน|กี่|ถึง|ทุกวัน|วัน)|ปิดกี่|ตอนนี้เปิด", re.IGNORECASE)
 _NAME = re.compile(r"^(?:ขอข้อมูลร้าน|ข้อมูลร้าน|ค้นหาร้าน|หาร้านชื่อ)\s*(.+)$")
-_AMOUNT = r"(\d{1,6})"
-_BUDGET = (re.compile(rf"(?:งบ(?:รวม)?|ราคา)\s*(?:ไม่เกิน|ประมาณ|สัก|แค่)?\s*{_AMOUNT}"), re.compile(rf"ไม่เกิน\s*{_AMOUNT}"),
+_AMOUNT = r"(?:\d{1,6}\s*[-–]\s*)?(\d{1,6})"  # the upper end of a range
+_BUDGET = (re.compile(rf"(?:งบ(?:รวม)?|ราคา)\s*(?:ไม่เกิน|ประมาณ|สัก|แค่)?\s*{_AMOUNT}"), re.compile(rf"(?:ไม่เกิน|คนละ)\s*{_AMOUNT}"),
            re.compile(rf"{_AMOUNT}\s*บาท"))
 _PARTY = re.compile(r"(\d{1,2})\s*คน")
 _VAGUE_BUDGET = re.compile(r"งบ|ราคา|บาท|ถูก ?ๆ")
