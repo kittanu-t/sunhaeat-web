@@ -2,7 +2,7 @@
 
 **Find places to eat across Thailand's 20 northeastern provinces, with a map and a Thai chat assistant that says what it does not know.**
 
-Built as an NLP/AI portfolio project. A successor to the [SunHaEat LINE bot](https://github.com/kittanu-t/SunHaEat), with new data, a new stack and a web security design. It is not affiliated with any restaurant listed.
+Built as an NLP/AI portfolio project. A successor to an earlier LINE bot of the same name, with new data, a new stack and a web security design. It is not affiliated with any restaurant listed.
 
 > Status: release 1 is built and tested locally. Not deployed yet. Gemini has not been evaluated yet; see [Evaluation](#evaluation).
 

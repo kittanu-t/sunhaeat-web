@@ -2,7 +2,7 @@
 
 **ทำแล้ว:** ระบบ rules บน dev split 46 ข้อ (เดิม 40 + บทสนทนาหลายรอบ 6 ข้อที่เพิ่มหลัง review) **ยังไม่ทำ:** Gemini (ไม่มีคีย์) และ test split 80 ข้อ (รอคนตรวจ gold)
 
-| ตัวชี้วัด (dev) | `8b41dce` n=40 | `56527c8` n=40 | `3faacd4` n=46 หลัง review |
+| ตัวชี้วัด (dev) | `e50ff07` n=40 | `bc73de7` n=40 | `e9e8a1d` n=46 หลัง review |
 |---|---:|---:|---:|
 | Slot F1 micro (20 คำถาม, 45 slots) | 0.918 | 0.953 | 0.953 |
 | Slot F1 macro (เฉลี่ย province, tags, budget) | 0.853 | 0.934 | 0.934 |
@@ -31,3 +31,5 @@
 1. คนตรวจ `eval/questions.jsonl` แล้วตั้ง `reviewed_by_human: true`
 2. `python -m eval.run --system gemini --split dev --max-calls 300` ปรับด้วย dev เท่านั้น
 3. รัน test ระบบละครั้งแล้วบันทึกที่นี่
+
+> เลข commit ในตารางถูกแก้ตามประวัติที่เขียนใหม่ก่อนเผยแพร่ (ลบเบอร์โทรจริงหนึ่งเบอร์ออกจาก test) โค้ดที่วัดเหมือนเดิม
