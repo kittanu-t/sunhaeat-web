@@ -28,8 +28,12 @@ _VAGUE_BUDGET = re.compile(r"งบ|ราคา|บาท|ถูก ?ๆ")
 _THAI_DIGITS = str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")
 
 
+def to_arabic_digits(text: str) -> str:
+    return text.translate(_THAI_DIGITS)
+
+
 def _tidy(text: str) -> str:
-    text = unicodedata.normalize("NFC", text).replace("ํา", "ำ").translate(_THAI_DIGITS).casefold()
+    text = unicodedata.normalize("NFC", to_arabic_digits(text)).replace("ํา", "ำ").casefold()
     text = re.sub(r"(?<=\d),(?=\d{3}\b)", "", text)
     return re.sub(r"\s+", " ", text).strip()
 
