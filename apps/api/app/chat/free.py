@@ -33,11 +33,11 @@ class ChatReply(BaseModel):
 def describe(filters: Filters, result: SearchResult) -> str:
     """Template text only; it never repeats a restaurant name or model output."""
     if result.matched:
-        parts = [f"พบร้านที่ตรงเงื่อนไข {len(result.matched)} ร้าน"]
+        parts = [f"แสดง {len(result.matched)} ร้านที่ตรงเงื่อนไข"]
         if result.maybe:
             parts.append(f"และอีก {len(result.maybe)} ร้านที่อาจตรงแต่ไม่ทราบราคา")
     elif result.maybe:
-        parts = [f"พบ {len(result.maybe)} ร้านที่อาจตรงแต่ไม่ทราบราคา ควรสอบถามร้านก่อน"]
+        parts = [f"แสดง {len(result.maybe)} ร้านที่อาจตรงแต่ไม่ทราบราคา ควรสอบถามร้านก่อน"]
     else:
         parts = ["ยังไม่พบร้านที่ตรงเงื่อนไข", CLARIFY]
     if result.demo:
