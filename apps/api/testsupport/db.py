@@ -29,8 +29,8 @@ class Db:
             self.execute("reset role")
 
 
-@pytest.fixture(scope="session")
-def database_url():
+@contextlib.contextmanager
+def postgres():
     if url := os.environ.get("TEST_DATABASE_URL"):
         yield url
         return
@@ -40,15 +40,25 @@ def database_url():
         yield pg.get_connection_url()
 
 
-@pytest.fixture(scope="session")
-def migrated_url(database_url):
-    with psycopg.connect(database_url, autocommit=True) as c:
+def migrate(url):
+    with psycopg.connect(url, autocommit=True) as c:
         # Supabase provides these roles; plain Postgres does not.
         for role in ("anon", "authenticated"):
             c.execute(f"do $$ begin create role {role} nologin; exception when duplicate_object then null; end $$")
         for path in sorted((ROOT / "supabase/migrations").glob("*.sql")):
             c.execute(path.read_text(encoding="utf8"))
         c.execute(f'alter database "{c.info.dbname}" set search_path = app, extensions, public')
+
+
+@pytest.fixture(scope="session")
+def database_url():
+    with postgres() as url:
+        yield url
+
+
+@pytest.fixture(scope="session")
+def migrated_url(database_url):
+    migrate(database_url)
     return database_url
 
 

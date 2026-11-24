@@ -85,6 +85,12 @@ export const GuidedResponse = z.object({
   prompt: z.object({ text: z.string(), options: z.array(z.string()) }).nullable(),
   reply: ChatReply.nullable(),
 });
+export const NearRequest = z.strictObject({
+  lat: z.number().min(-90).max(90),
+  lon: z.number().min(-180).max(180),
+  q: z.string().trim().min(1).max(100).optional(),
+  tags: z.array(z.string().max(30)).max(15).optional(),
+});
 export const SessionRequest = z.strictObject({ token: z.string().min(1).max(4096) });
 
 export type Place = z.infer<typeof Place>;

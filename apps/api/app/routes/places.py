@@ -1,10 +1,10 @@
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import ValidationError
+from pydantic import Field, ValidationError
 
 from app.db import Cur
-from app.models import Near, ProvinceCode
+from app.models import Near, ProvinceCode, Strict
 from app.search import repository as repo
 from app.search.tags import LABELS, TAGS
 
@@ -44,6 +44,20 @@ def places(cur: Cur, q: Annotated[str | None, Query(max_length=100)] = None, pro
         raise HTTPException(422, "unknown_tag")
     return {"places": repo.list_places(cur, name=q, province=province, tags=tag, bbox=_bbox(bbox) if bbox else None,
                                        near=_near(near) if near else None, demo=demo, limit=limit)}
+
+
+class NearSearch(Strict):
+    near: Near
+    q: Annotated[str, Field(max_length=100)] | None = None
+    tags: list[str] = Field(default_factory=list, max_length=15)
+
+
+@router.post("/search")
+def near_search(cur: Cur, body: NearSearch) -> dict:
+    """POST so a visitor's coordinates never appear in URL logs."""
+    if set(body.tags) - set(TAGS):
+        raise HTTPException(422, "unknown_tag")
+    return {"places": repo.list_places(cur, name=body.q, tags=body.tags, near=body.near, limit=100)}
 
 
 @router.get("/places/{slug}")

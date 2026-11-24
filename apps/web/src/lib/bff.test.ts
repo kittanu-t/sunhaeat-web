@@ -4,6 +4,7 @@ import vectors from "../../../../tests/fixtures/hmac.json";
 import { POST as chatFree } from "@/app/api/chat/free/route";
 import { POST as chatGuided } from "@/app/api/chat/guided/route";
 import { GET as getMeta } from "@/app/api/meta/route";
+import { POST as postNear } from "@/app/api/near/route";
 import { GET as getPlace } from "@/app/api/places/[slug]/route";
 import { GET as getPlaces } from "@/app/api/places/route";
 import { POST as createSession } from "@/app/api/session/route";
@@ -83,6 +84,24 @@ describe("places", () => {
   it("forwards only known query parameters", async () => {
     await getPlaces(new Request(`${ORIGIN}/api/places?q=${encodeURIComponent("ตำ")}&tag=isan&tag=noodle&evil=1&limit=5`));
     expect(upstream[0].url).toBe(`https://api.test/v1/places?q=${encodeURIComponent("ตำ")}&tag=isan&tag=noodle&limit=5`);
+  });
+
+  it("never forwards coordinates from a URL", async () => {
+    await getPlaces(new Request(`${ORIGIN}/api/places?near=16.4,102.8,500`));
+    expect(upstream[0].url).toBe("https://api.test/v1/places");
+  });
+
+  it("sends a near search by POST with rounded coordinates", async () => {
+    const res = await postNear(post("/api/near", { lat: 16.432198, lon: 102.834567, tags: ["isan"] }));
+    expect(res.status).toBe(200);
+    expect(upstream[0].url).toBe("https://api.test/v1/search");
+    expect(JSON.parse(String(upstream[0].init.body))).toEqual({ near: { lat: 16.432, lon: 102.835, radius_m: 5000 }, tags: ["isan"] });
+  });
+
+  it.each([[{ lat: 91, lon: 1 }], [{ lat: 1 }], [{ lat: "1", lon: 1 }]])("rejects near search %j", async (body) => {
+    expect((await postNear(post("/api/near", body))).status).toBe(400);
+    expect((await postNear(post("/api/near", { lat: 1, lon: 1 }, { origin: "https://evil.test" }))).status).toBe(403);
+    expect(upstream).toHaveLength(0);
   });
 
   it("returns 502 when the API answer does not match the contract", async () => {

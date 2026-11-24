@@ -75,6 +75,13 @@ def test_bad_parameters_are_422(api, catalog, params):
     assert api.get("/v1/places", **params).status_code == 422
 
 
+def test_near_search_by_post_keeps_coordinates_out_of_the_url(api, catalog):
+    r = api.post("/v1/search", {"near": {"lat": 16.43, "lon": 102.83, "radius_m": 1000}, "tags": ["isan"]})
+    assert r.status_code == 200 and [p["slug"] for p in r.json()["places"]] == ["tam"]
+    assert api.post("/v1/search", {"near": {"lat": 999, "lon": 1}}).status_code == 422
+    assert api.post("/v1/search", {"budget_per_person": 5}).status_code == 422
+
+
 def test_detail_has_sources_and_unknowns_are_null(api, catalog):
     p = api.get("/v1/places/tam").json()
     assert p["price_max"] is None and p["menu"] == [] and p["hours"] == []
