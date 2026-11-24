@@ -1,0 +1,35 @@
+[
+  {
+    "name": "get",
+    "secret": "vector-secret",
+    "ts": "1800000000",
+    "method": "GET",
+    "target": "/v1/places?tag=isan&limit=5",
+    "session": "sess",
+    "ip": "iph",
+    "body": "",
+    "signature": "0b2b6c4a0da546ea954015de2ac8a039ccfebd1c828f962b311af33babaaba47"
+  },
+  {
+    "name": "thai path",
+    "secret": "vector-secret",
+    "ts": "1800000000",
+    "method": "GET",
+    "target": "/v1/places/ร้าน-ตำ-1234abcd",
+    "session": "sess",
+    "ip": "iph",
+    "body": "",
+    "signature": "71eb7566dc75cf8eba4f778790846efe3bbf98f7753d466f01141178485f1fcd"
+  },
+  {
+    "name": "thai body",
+    "secret": "vector-secret",
+    "ts": "1800000000",
+    "method": "POST",
+    "target": "/v1/chat/free",
+    "session": "sess",
+    "ip": "iph",
+    "body": "{\"text\":\"ส้มตำ\"}",
+    "signature": "b53e0ef9736e679318ec841567499e6867af110a6b1711b69c6819c07b76c215"
+  }
+]

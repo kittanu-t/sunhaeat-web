@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.main import create_app
 from app.settings import Settings
+from testsupport.api import SECRET, SignedClient
 
 
 @pytest.fixture
@@ -28,5 +29,5 @@ def test_ai_is_off_unless_fully_configured(flag, key, model, ready):
 
 @pytest.mark.parametrize("path", ["/docs", "/openapi.json", "/redoc"])
 def test_api_docs_are_hidden_in_production(path):
-    prod = TestClient(create_app(Settings(_env_file=None, env="production")))
+    prod = SignedClient(create_app(Settings(_env_file=None, env="production", api_hmac_secret=SECRET)))
     assert prod.get(path).status_code == 404
