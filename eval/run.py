@@ -68,7 +68,8 @@ def ask(pool, settings, transport, question) -> dict:
     started = time.perf_counter()
     reply = answer_free(pool, settings, transport, question["text"], question.get("history", []), "eval", "eval")
     return {"id": question["id"], "group": question["group"], "mode": reply.mode, "partial": reply.partial,
-            "ai_code": reply.ai_code, "ai_unavailable": reply.ai_unavailable, "text": reply.text, "filters": reply.filters.model_dump(mode="json"), "places": shown(reply),
+            "ai_code": reply.ai_code, "ai_unavailable": reply.ai_unavailable,
+            "text": reply.text, "filters": reply.filters.model_dump(mode="json"), "places": shown(reply),
             "latency_ms": (time.perf_counter() - started) * 1000}
 
 

@@ -13,6 +13,12 @@ Built as an NLP/AI portfolio project. A successor to the [SunHaEat LINE bot](htt
 - **Free chat**: Thai rules read the question first. Gemini is called only when rules are not enough, may only return filters and IDs from a supplied list, and never writes the answer.
 - **Guided chat**: five questions, no language model, works when AI is off.
 
+![Search results and map on desktop](docs/images/search-desktop.png)
+
+| Phone search | Chat |
+|---|---|
+| ![Phone search](docs/images/home-phone.png) | ![Chat on a phone](docs/images/chat1-phone.png) |
+
 ## How it works
 
 ```text
@@ -27,7 +33,7 @@ Browser -> Next.js (Vercel) -> FastAPI (Vercel Python) -> Postgres + PostGIS (Su
 | `apps/api` | FastAPI: search, two chat modes, atomic quotas |
 | `pipeline` | Overture extract, filtering, dedupe, Thai food tagging, transactional import |
 | `supabase/migrations` | Schema, row-level security, least-privilege runtime role |
-| `eval` | 120 draft questions, metrics, runner |
+| `eval` | 126 draft questions, metrics, runner |
 
 Design decisions and evidence: [design](docs/superpowers/specs/2026-11-24-sunhaeat-web-design.md), [data gate](docs/evidence/2026-11-24-data-gate.md), [dataset build](docs/evidence/dataset-build.md), [threat model](docs/threat-model.md).
 
@@ -56,7 +62,11 @@ Configuration is listed in [.env.example](.env.example). Deployment and recovery
 
 ## Evaluation
 
-Only the rules system has been measured, and only on the 40-question **dev** split that was also used to fix two parser bugs. Questions were drafted by the same assistant that wrote the rules and have not been reviewed by a person, so these numbers are optimistic. The 80-question test split is untouched. Details and limits: [eval-r1](docs/evidence/eval-r1.md).
+Only the rules system has been measured, and only on the 46-question **dev** split that was also used to fix parser bugs (slot F1 micro 0.953, macro 0.934 on 20 questions; four questions showed places that break what was really asked). Questions were drafted by the same assistant that wrote the rules and have not been reviewed by a person, so these numbers are optimistic. The 80-question test split is untouched. Details and limits: [eval-r1](docs/evidence/eval-r1.md).
+
+## Measured locally
+
+Lighthouse 12 mobile, three runs each on the production build with the real dataset: home 93/94/94, real place page 97/96/96, demo place page 96/97/96, chat 96/95/95; accessibility 100 on all four. Phones load the map only when asked. Hosted numbers will differ.
 
 ## Data and licences
 

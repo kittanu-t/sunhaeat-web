@@ -1,6 +1,6 @@
 # Dataset build (2026-11-24)
 
-สร้างด้วย `python -m pipeline.build_dataset data/raw data/build` จาก Overture `2026-11-18.0`; sha256 ของ `restaurants.ndjson` `78f44e4ab0bad3e414799846279fcaf92d2bb542bd512fee445564346d5812e9`
+สร้างด้วย `python -m pipeline.build_dataset data/raw data/build` จาก Overture `2026-11-18.0`; sha256 ของ `restaurants.ndjson` `7cacc8d9be32a90836173fb9a74d93047f6da478c1b63d0820d8d3bbbc669a8e`
 
 | รายการ | ค่า |
 |---|---:|
@@ -8,7 +8,7 @@
 | หลังทำความสะอาดและตัดซ้ำ 150 ม. | 30,348 |
 | จังหวัดที่มีร้าน | 20/20 |
 | ไม่มี source/license | 0 |
-| ไม่มีแท็กอาหาร | 8,488 (28.0%) |
+| ไม่มีแท็กอาหาร | 8,487 (28.0%) |
 | ขนาด DB หลัง import (PostGIS 17-3.5, รวม extension) | 55 MB |
 
 - ร้านสมมติ 12 ร้าน ชื่อไม่ชนกับร้านจริงหลัง normalize

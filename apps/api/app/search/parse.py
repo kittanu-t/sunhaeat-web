@@ -24,7 +24,8 @@ _NAME = re.compile(r"^(?:ขอข้อมูลร้าน|ข้อมูล
 # The upper end of a range, and never a distance, a duration or a head count.
 _AMOUNT = (r"(?:\d{1,6}\s*[-–]\s*)?(\d{1,6})(?![\d.])"
            r"(?!\s*(?:กม|กิโล|km|เมตร|ม\.|นาที|ชั่วโมง|ชม|คน|ร้าน))")
-_BUDGET = (re.compile(rf"(?:งบ(?:รวม)?|ราคา)\s*(?:ไม่เกิน|ประมาณ|สัก|แค่)?\s*{_AMOUNT}"), re.compile(rf"(?:ไม่เกิน|คนละ)\s*(?:ไม่เกิน)?\s*{_AMOUNT}"),
+_BUDGET = (re.compile(rf"(?:งบ(?:รวม)?|ราคา)\s*(?:ไม่เกิน|ประมาณ|สัก|แค่)?\s*{_AMOUNT}"),
+           re.compile(rf"(?:ไม่เกิน|คนละ)\s*(?:ไม่เกิน)?\s*{_AMOUNT}"),
            re.compile(rf"{_AMOUNT}\s*บาท"))
 _PARTY = re.compile(r"(\d{1,2})\s*คน")
 _VAGUE_BUDGET = re.compile(r"งบ|ราคา|บาท|ถูก ?ๆ")
