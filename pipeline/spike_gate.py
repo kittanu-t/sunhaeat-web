@@ -1,3 +1,4 @@
+# ruff: noqa -- one-off evidence script, kept as run
 """Data-gate spike: count Isan eateries in the Overture extract and draw a seeded sample.
 
 Usage: python pipeline/spike_gate.py data/raw data/spike      (round 1 rules)
