@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = ""
     ai_enabled: str = "false"  # a string so anything other than exactly "true" keeps AI off
+    ai_timeout_s: float = 6
     cron_secret: str = ""
     session_daily_ai: int = 20
     ip_daily_ai: int = 40
