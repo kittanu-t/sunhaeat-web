@@ -1,3 +1,4 @@
+# ruff: noqa: S608 -- SQL is built from constants in this file
 """Download Overture places and Thai province polygons for the Isan bounding box."""
 import os
 import sys
