@@ -45,7 +45,7 @@ Needs Node 24, Python 3.12, [uv](https://docs.astral.sh/uv/) and Docker (throwaw
 npm ci
 uv sync --project apps/api
 npm test -w apps/web                                   # BFF and security unit tests
-uv run --project apps/api --directory apps/api pytest  # API, RLS, pipeline and metrics on real Postgres
+uv run --directory apps/api pytest  # API, RLS, pipeline and metrics on real Postgres
 npx -w apps/web playwright install chromium
 npm run e2e -w apps/web                                # build, then browser tests on phone and desktop sizes
 ```

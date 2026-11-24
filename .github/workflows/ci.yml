@@ -22,16 +22,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
       - run: uv sync --locked --project apps/api
-      - run: uv run --project apps/api --directory apps/api ruff check ../..
-      - run: uv run --project apps/api --directory apps/api pytest
+      - run: uv run --directory apps/api ruff check ../..
+      - run: uv run --directory apps/api pytest
       - run: uv export --locked --project apps/api --no-dev --no-hashes > requirements.txt && uvx pip-audit -r requirements.txt
   secrets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: { fetch-depth: 0 }
-      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
-        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+      # The whole history on every run; the action only scans the pushed range and fails on a first push.
+      - run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git /repo --no-banner --redact
   codeql:
     runs-on: ubuntu-latest
     permissions: { contents: read, security-events: write }

@@ -26,7 +26,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "uv run --project ../api --directory ../api python -m testsupport.e2e_server 8011",
+      command: "uv run --directory ../api python -m testsupport.e2e_server 8011",
       env: { PYTHONPATH: process.platform === "win32" ? ".;../.." : ".:../.." },
       url: "http://127.0.0.1:8011/healthz",
       timeout: 90_000,
