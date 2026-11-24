@@ -1,0 +1,761 @@
+[
+  {
+    "slug": "demo-krua-dao-bueng",
+    "name": "ครัวดาวบึงสมมติ",
+    "province_code": "TH-40",
+    "lat": 16.415,
+    "lon": 102.838,
+    "tags": [
+      "isan",
+      "rice_made_to_order"
+    ],
+    "description": "อาหารอีสานจานแบ่ง นั่งกินริมน้ำ",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 45,
+    "price_max": 90,
+    "menu": [
+      {
+        "name": "ส้มตำไทย",
+        "price_thb": 45
+      },
+      {
+        "name": "ไก่ย่างครึ่งตัว",
+        "price_thb": 90
+      },
+      {
+        "name": "ข้าวกะเพราหมูกรอบ",
+        "price_thb": 65
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "10:00",
+        "closes": "20:00"
+      },
+      {
+        "weekday": 1,
+        "opens": "10:00",
+        "closes": "20:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "10:00",
+        "closes": "20:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "10:00",
+        "closes": "20:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "10:00",
+        "closes": "20:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "10:00",
+        "closes": "20:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "10:00",
+        "closes": "20:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-tiao-ruea-jamlong",
+    "name": "เตี๋ยวเรือจำลอง",
+    "province_code": "TH-40",
+    "lat": 16.445,
+    "lon": 102.829,
+    "tags": [
+      "noodle"
+    ],
+    "description": "ก๋วยเตี๋ยวเรือชามเล็กและเย็นตาโฟ",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 15,
+    "price_max": 50,
+    "menu": [
+      {
+        "name": "ก๋วยเตี๋ยวเรือหมู",
+        "price_thb": 20
+      },
+      {
+        "name": "เย็นตาโฟ",
+        "price_thb": 50
+      },
+      {
+        "name": "แคบหมู",
+        "price_thb": 15
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "09:00",
+        "closes": "16:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "09:00",
+        "closes": "16:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "09:00",
+        "closes": "16:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "09:00",
+        "closes": "16:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "09:00",
+        "closes": "16:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "09:00",
+        "closes": "16:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-kafe-nangsue",
+    "name": "คาเฟ่หน้ากระดาษตัวอย่าง",
+    "province_code": "TH-40",
+    "lat": 16.466,
+    "lon": 102.82,
+    "tags": [
+      "coffee",
+      "bakery_dessert"
+    ],
+    "description": "คาเฟ่อ่านหนังสือ มีปลั๊กทุกโต๊ะ",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 55,
+    "price_max": 75,
+    "menu": [
+      {
+        "name": "อเมริกาโน",
+        "price_thb": 55
+      },
+      {
+        "name": "ลาเต้",
+        "price_thb": 65
+      },
+      {
+        "name": "เค้กกล้วยหอม",
+        "price_thb": 75
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      {
+        "weekday": 1,
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "08:00",
+        "closes": "18:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-mu-kratha-thodlong",
+    "name": "หมูกระทะทดลองไฟ",
+    "province_code": "TH-41",
+    "lat": 17.417,
+    "lon": 102.78,
+    "tags": [
+      "hotpot_grill"
+    ],
+    "description": "บุฟเฟต์หมูกระทะสำหรับกลุ่มเพื่อน",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 199,
+    "price_max": 259,
+    "menu": [
+      {
+        "name": "บุฟเฟต์หมู",
+        "price_thb": 199
+      },
+      {
+        "name": "บุฟเฟต์หมูและทะเล",
+        "price_thb": 259
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "16:00",
+        "closes": "23:00"
+      },
+      {
+        "weekday": 1,
+        "opens": "16:00",
+        "closes": "23:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "16:00",
+        "closes": "23:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "16:00",
+        "closes": "23:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "16:00",
+        "closes": "23:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "16:00",
+        "closes": "23:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "16:00",
+        "closes": "23:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-naem-nueang-sommut",
+    "name": "แหนมเนืองบ้านสมมติ",
+    "province_code": "TH-41",
+    "lat": 17.406,
+    "lon": 102.79,
+    "tags": [
+      "vietnamese"
+    ],
+    "description": "อาหารเวียดนามแบบครอบครัว",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 50,
+    "price_max": 120,
+    "menu": [
+      {
+        "name": "แหนมเนืองชุดเล็ก",
+        "price_thb": 120
+      },
+      {
+        "name": "ปอเปี๊ยะสด",
+        "price_thb": 60
+      },
+      {
+        "name": "ก๋วยจั๊บญวน",
+        "price_thb": 50
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "08:00",
+        "closes": "19:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "08:00",
+        "closes": "19:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "08:00",
+        "closes": "19:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "08:00",
+        "closes": "19:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "08:00",
+        "closes": "19:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "08:00",
+        "closes": "19:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-sushi-nai-fan",
+    "name": "ซูชิในฝันโคราช",
+    "province_code": "TH-30",
+    "lat": 14.951,
+    "lon": 102.093,
+    "tags": [
+      "japanese"
+    ],
+    "description": "ซูชิและข้าวหน้าราคานักเรียน",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 80,
+    "price_max": 220,
+    "menu": [
+      {
+        "name": "แซลมอนนิกิริ 2 คำ",
+        "price_thb": 80
+      },
+      {
+        "name": "ข้าวหน้าไก่เทริยากิ",
+        "price_thb": 95
+      },
+      {
+        "name": "เซ็ตซูชิ 10 คำ",
+        "price_thb": 220
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 1,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "11:00",
+        "closes": "21:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-steak-fai-chai",
+    "name": "สเต๊กไฟฉายสมมติ",
+    "province_code": "TH-30",
+    "lat": 14.974,
+    "lon": 102.1,
+    "tags": [
+      "western"
+    ],
+    "description": "สเต๊กจานร้อนและสปาเกตตี",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 89,
+    "price_max": 239,
+    "menu": [
+      {
+        "name": "สเต๊กไก่",
+        "price_thb": 89
+      },
+      {
+        "name": "สเต๊กหมูพริกไทยดำ",
+        "price_thb": 109
+      },
+      {
+        "name": "สเต๊กเนื้อ",
+        "price_thb": 239
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "11:00",
+        "closes": "21:30"
+      },
+      {
+        "weekday": 2,
+        "opens": "11:00",
+        "closes": "21:30"
+      },
+      {
+        "weekday": 3,
+        "opens": "11:00",
+        "closes": "21:30"
+      },
+      {
+        "weekday": 4,
+        "opens": "11:00",
+        "closes": "21:30"
+      },
+      {
+        "weekday": 5,
+        "opens": "11:00",
+        "closes": "21:30"
+      },
+      {
+        "weekday": 6,
+        "opens": "11:00",
+        "closes": "21:30"
+      }
+    ]
+  },
+  {
+    "slug": "demo-jok-chao-mued",
+    "name": "โจ๊กเช้ามืดตัวอย่าง",
+    "province_code": "TH-34",
+    "lat": 15.229,
+    "lon": 104.857,
+    "tags": [
+      "congee"
+    ],
+    "description": "โจ๊กและข้าวต้มตั้งแต่เช้าตรู่",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 35,
+    "price_max": 70,
+    "menu": [
+      {
+        "name": "โจ๊กหมู",
+        "price_thb": 35
+      },
+      {
+        "name": "โจ๊กหมูไข่เค็ม",
+        "price_thb": 50
+      },
+      {
+        "name": "ข้าวต้มปลา",
+        "price_thb": 70
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "05:00",
+        "closes": "10:30"
+      },
+      {
+        "weekday": 1,
+        "opens": "05:00",
+        "closes": "10:30"
+      },
+      {
+        "weekday": 2,
+        "opens": "05:00",
+        "closes": "10:30"
+      },
+      {
+        "weekday": 3,
+        "opens": "05:00",
+        "closes": "10:30"
+      },
+      {
+        "weekday": 4,
+        "opens": "05:00",
+        "closes": "10:30"
+      },
+      {
+        "weekday": 5,
+        "opens": "05:00",
+        "closes": "10:30"
+      },
+      {
+        "weekday": 6,
+        "opens": "05:00",
+        "closes": "10:30"
+      }
+    ]
+  },
+  {
+    "slug": "demo-thale-klai-thale",
+    "name": "ทะเลไกลทะเล",
+    "province_code": "TH-34",
+    "lat": 15.242,
+    "lon": 104.849,
+    "tags": [
+      "seafood"
+    ],
+    "description": "อาหารทะเลจานใหญ่สำหรับแบ่งกัน",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 90,
+    "price_max": 350,
+    "menu": [
+      {
+        "name": "กุ้งเผา 500 กรัม",
+        "price_thb": 350
+      },
+      {
+        "name": "หอยทอด",
+        "price_thb": 90
+      },
+      {
+        "name": "ต้มยำทะเล",
+        "price_thb": 180
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "15:00",
+        "closes": "22:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "15:00",
+        "closes": "22:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "15:00",
+        "closes": "22:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "15:00",
+        "closes": "22:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "15:00",
+        "closes": "22:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "15:00",
+        "closes": "22:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-kimchi-klang-na",
+    "name": "กิมจิกลางนาสมมติ",
+    "province_code": "TH-45",
+    "lat": 16.056,
+    "lon": 103.651,
+    "tags": [
+      "korean"
+    ],
+    "description": "อาหารเกาหลีรสกลาง เพิ่มเผ็ดได้",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 79,
+    "price_max": 129,
+    "menu": [
+      {
+        "name": "ต๊อกบกกี",
+        "price_thb": 79
+      },
+      {
+        "name": "คิมบับ",
+        "price_thb": 89
+      },
+      {
+        "name": "ซุปกิมจิ",
+        "price_thb": 129
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "10:30",
+        "closes": "20:30"
+      },
+      {
+        "weekday": 1,
+        "opens": "10:30",
+        "closes": "20:30"
+      },
+      {
+        "weekday": 2,
+        "opens": "10:30",
+        "closes": "20:30"
+      },
+      {
+        "weekday": 3,
+        "opens": "10:30",
+        "closes": "20:30"
+      },
+      {
+        "weekday": 4,
+        "opens": "10:30",
+        "closes": "20:30"
+      },
+      {
+        "weekday": 5,
+        "opens": "10:30",
+        "closes": "20:30"
+      },
+      {
+        "weekday": 6,
+        "opens": "10:30",
+        "closes": "20:30"
+      }
+    ]
+  },
+  {
+    "slug": "demo-timsam-khem-nom",
+    "name": "ติ่มซำเข่งน้อยจำลอง",
+    "province_code": "TH-47",
+    "lat": 17.164,
+    "lon": 104.148,
+    "tags": [
+      "chinese"
+    ],
+    "description": "ติ่มซำเข่งเล็กและชาร้อน",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 25,
+    "price_max": 120,
+    "menu": [
+      {
+        "name": "ขนมจีบกุ้ง",
+        "price_thb": 35
+      },
+      {
+        "name": "ซาลาเปาไส้ครีม",
+        "price_thb": 25
+      },
+      {
+        "name": "บะกุ๊ดเต๋",
+        "price_thb": 120
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "06:00",
+        "closes": "13:00"
+      },
+      {
+        "weekday": 1,
+        "opens": "06:00",
+        "closes": "13:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "06:00",
+        "closes": "13:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "06:00",
+        "closes": "13:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "06:00",
+        "closes": "13:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "06:00",
+        "closes": "13:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "06:00",
+        "closes": "13:00"
+      }
+    ]
+  },
+  {
+    "slug": "demo-cha-nom-talat",
+    "name": "ชานมตลาดสมมติ",
+    "province_code": "TH-48",
+    "lat": 17.408,
+    "lon": 104.78,
+    "tags": [
+      "bubble_tea",
+      "bakery_dessert"
+    ],
+    "description": "ชานมและขนมหวานริมโขง",
+    "address": "ที่อยู่สมมติ ตำแหน่งบนแผนที่เป็นสวนหรือบึงสาธารณะ",
+    "price_min": 40,
+    "price_max": 50,
+    "menu": [
+      {
+        "name": "ชานมไข่มุก",
+        "price_thb": 40
+      },
+      {
+        "name": "ชาเขียวนม",
+        "price_thb": 45
+      },
+      {
+        "name": "โทสต์เนยนม",
+        "price_thb": 50
+      }
+    ],
+    "hours": [
+      {
+        "weekday": 0,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 1,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 2,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 3,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 4,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 5,
+        "opens": "11:00",
+        "closes": "21:00"
+      },
+      {
+        "weekday": 6,
+        "opens": "11:00",
+        "closes": "21:00"
+      }
+    ]
+  }
+]

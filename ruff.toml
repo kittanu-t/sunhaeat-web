@@ -1,0 +1,11 @@
+line-length = 130
+target-version = "py312"
+src = ["apps/api", "."]
+
+[lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["S"]
+"apps/api/testsupport/**" = ["S"]
+"pipeline/*" = ["S608"] # SQL text is built from constants in the same file
