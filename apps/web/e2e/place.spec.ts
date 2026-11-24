@@ -22,6 +22,7 @@ test("a demo place is labelled before its name and has a menu", async ({ page })
   const title = page.getByRole("heading", { level: 1 });
   expect((await badge.boundingBox())!.y).toBeLessThan((await title.boundingBox())!.y);
   await expect(page.getByText("ส้มตำไทย")).toBeVisible();
+  await expect(page.getByRole("region", { name: "ร้านใกล้เคียง" })).toHaveCount(0);
   await expect(page.locator("dl > div", { has: page.locator('dt:text-is("ราคา")') })).toContainText("45–90 บาท");
 });
 

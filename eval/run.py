@@ -18,7 +18,7 @@ from app.chat.free import answer_free
 from app.chat.gemini import SdkTransport
 from app.db import get_pool
 from app.settings import Settings
-from eval.metrics import constraint_violations, percentile, recall_at_k, slot_f1
+from eval.metrics import constraint_violations, gold_violations, percentile, recall_at_k, slot_f1
 
 ROOT = pathlib.Path(__file__).parents[1]
 QUESTIONS = ROOT / "eval/questions.jsonl"
@@ -26,6 +26,12 @@ QUESTIONS = ROOT / "eval/questions.jsonl"
 
 class OutOfCalls(Exception):
     pass
+
+
+def ran_fully(system: str, answers: list[dict]) -> bool:
+    """False when a Gemini run answered some questions without Gemini being available."""
+    lost = [a for a in answers if a["ai_unavailable"] in ("limit", "off") or a["ai_code"] in ("quota", "auth")]
+    return system == "rules" or not lost
 
 
 class CallBudget:
@@ -61,8 +67,8 @@ def shown(reply) -> list[dict]:
 def ask(pool, settings, transport, question) -> dict:
     started = time.perf_counter()
     reply = answer_free(pool, settings, transport, question["text"], question.get("history", []), "eval", "eval")
-    return {"id": question["id"], "group": question["group"], "mode": reply.mode, "ai_code": reply.ai_code, "text": reply.text,
-            "filters": reply.filters.model_dump(mode="json"), "places": shown(reply),
+    return {"id": question["id"], "group": question["group"], "mode": reply.mode, "partial": reply.partial,
+            "ai_code": reply.ai_code, "ai_unavailable": reply.ai_unavailable, "text": reply.text, "filters": reply.filters.model_dump(mode="json"), "places": shown(reply),
             "latency_ms": (time.perf_counter() - started) * 1000}
 
 
@@ -73,7 +79,7 @@ def exact_rate(pairs) -> float:
 
 def score(questions: list[dict], answers: list[dict]) -> dict:
     by_group = {g: [(q, a) for q, a in zip(questions, answers, strict=True) if q["group"] == g]
-                for g in ("slots", "retrieval", "abstain", "injection")}
+                for g in ("slots", "retrieval", "abstain", "injection", "dialogue")}
     report: dict = {"n": len(answers), "n_by_group": {g: len(v) for g, v in by_group.items()}}
     if pairs := by_group["slots"]:
         report["slots"] = slot_f1([q["gold"] for q, _ in pairs], [a["filters"] for _, a in pairs])
@@ -86,7 +92,14 @@ def score(questions: list[dict], answers: list[dict]) -> dict:
         report["abstain_rate"] = sum(not a["places"] for _, a in pairs) / len(pairs)
     if pairs := by_group["injection"]:
         report["injection_slots_exact"] = exact_rate(pairs)
-    report["constraint_violations"] = sum(constraint_violations(a["filters"], a["places"]) for a in answers)
+    if pairs := by_group["dialogue"]:
+        report["dialogue"] = slot_f1([q["gold"] for q, _ in pairs], [a["filters"] for _, a in pairs])
+        report["dialogue"]["exact_question_rate"] = exact_rate(pairs)
+    report["self_consistency_violations"] = sum(constraint_violations(a["filters"], a["places"]) for a in answers)
+    labelled = [(q, a) for q, a in zip(questions, answers, strict=True) if "gold" in q]
+    report["gold_violations"] = sum(gold_violations(q["gold"], a["places"]) for q, a in labelled)
+    report["gold_violation_questions"] = sum(gold_violations(q["gold"], a["places"]) > 0 for q, a in labelled)
+    report["partial_answers"] = sum(a["partial"] for a in answers)
     report["modes"] = {m: sum(a["mode"] == m for a in answers) for m in ("ai", "rules")}
     report["ai_errors"] = {c: sum(a["ai_code"] == c for a in answers) for c in sorted({a["ai_code"] for a in answers if a["ai_code"]})}
     report["latency_ms"] = {f"p{p}": percentile([a["latency_ms"] for a in answers], p) for p in (50, 95)}
@@ -99,6 +112,7 @@ def main() -> None:
     args.add_argument("--system", choices=["rules", "gemini"], required=True)
     args.add_argument("--split", choices=["dev", "test"], required=True)
     args.add_argument("--max-calls", type=int, default=300)
+    args.add_argument("--delay", type=float, default=6, help="seconds between Gemini questions")
     o = args.parse_args()
     huge = {"session_daily_ai": 10_000, "ip_daily_ai": 10_000, "global_daily_ai": 10_000}
     settings = Settings(_env_file=None, **huge)
@@ -111,7 +125,12 @@ def main() -> None:
         transport = CountingTransport(SdkTransport(settings.gemini_api_key, settings.gemini_model, settings.ai_timeout_s), budget)
     questions, answers, complete = load(o.split), [], True
     with get_pool(settings) as pool:
+        with pool.connection() as conn:
+            if transport and conn.execute("select 1 from app.ai_usage where scope = 'global' and blocked").fetchone():
+                raise SystemExit("AI is blocked in this database; clear app.ai_usage first")
         for q in questions:
+            if transport and answers:
+                time.sleep(o.delay)
             try:
                 answers.append(ask(pool, settings, transport, q))
             except OutOfCalls:
@@ -120,7 +139,8 @@ def main() -> None:
     manifest = json.loads((ROOT / "data/build/manifest.json").read_text(encoding="utf8"))
     git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True)  # noqa: S607
     report = {
-        "system": o.system, "split": o.split, "complete": complete, "at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "system": o.system, "split": o.split, "complete": complete and ran_fully(o.system, answers),
+        "at": datetime.now(UTC).isoformat(timespec="seconds"),
         "commit": git.stdout.strip(), "model": settings.gemini_model or None, "dataset_sha256": manifest["sha256"],
         "questions_sha256": hashlib.sha256(QUESTIONS.read_bytes()).hexdigest(), "calls": budget.used,
         "tokens": transport.tokens if transport else 0, **score(questions[:len(answers)], answers),

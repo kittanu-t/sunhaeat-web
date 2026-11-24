@@ -1,7 +1,7 @@
 import type { z } from "zod";
 
 interface Turnstile {
-  render(element: HTMLElement, options: { sitekey: string; callback(token: string): void; "error-callback"(): void }): string;
+  render(element: HTMLElement, options: { sitekey: string; callback(token: string): void; "error-callback"(): void; "timeout-callback"(): void; "unsupported-callback"(): void }): string;
   remove(id: string): void;
 }
 declare global {
@@ -11,6 +11,8 @@ declare global {
 // Cloudflare's documented always-pass key; the server refuses its secret in production.
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
 const SCRIPT = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+const VERIFY_MS = 30_000;
 
 export class ChatProblem extends Error {}
 
@@ -37,10 +39,12 @@ async function startSession(widget: HTMLElement): Promise<void> {
   try {
     const turnstile = await loadScript();
     token = await new Promise<string>((resolve, reject) => {
+      const fail = () => { clearTimeout(timer); turnstile.remove(id); reject(new Error("turnstile")); };
+      const timer = setTimeout(fail, VERIFY_MS);
       const id = turnstile.render(widget, {
         sitekey: SITE_KEY,
-        callback: (value) => { turnstile.remove(id); resolve(value); },
-        "error-callback": () => { turnstile.remove(id); reject(new Error("turnstile")); },
+        callback: (value) => { clearTimeout(timer); turnstile.remove(id); resolve(value); },
+        "error-callback": fail, "timeout-callback": fail, "unsupported-callback": fail,
       });
     });
   } catch {

@@ -5,9 +5,9 @@ import { expect, test } from "./fixtures";
 
 const signIn = (page: Page) =>
   page.context().addCookies([{ name: "she_session", value: issueSession(), url: "http://localhost:3100", httpOnly: true, sameSite: "Lax" }]);
-const lane = (page: Page, name: string) => page.getByRole("region", { name }).locator("article[data-place]");
+const lane = (page: Page, name: string) => page.getByRole("region", { name, exact: true }).locator("article[data-place]");
 const REPLY = {
-  mode: "rules", text: "ลองระบุจังหวัด", disclaimer: "d", ai_unavailable: "limit", result: { matched: [], maybe: [], demo: [] },
+  mode: "rules", text: "ลองระบุจังหวัด", disclaimer: "d", partial: false, ai_unavailable: "limit", result: { matched: [], maybe: [], demo: [] },
   filters: { name: null, province_code: null, tags: [], terms: [], near: null, budget_per_person: null, needs_clarification: true },
 };
 
@@ -61,6 +61,27 @@ test("free mode answers from rules and says AI was not used", async ({ page }) =
   await ask(page, "ส้มตำขอนแก่น");
   await expect(lane(page, "ตรงเงื่อนไข")).toHaveCount(3);
   await expect(page.getByText("คำตอบนี้มาจากกฎ ไม่ได้ใช้ AI")).toBeVisible();
+});
+
+test("a partly understood request is not labelled a full match", async ({ page }) => {
+  await page.goto("/chat");
+  await ask(page, "ส้มตำขอนแก่นที่มีห้องแอร์");
+  await expect(lane(page, "ตรงเฉพาะบางเงื่อนไข")).toHaveCount(3);
+  await expect(lane(page, "ตรงเงื่อนไข")).toHaveCount(0);
+});
+
+test("a verification that never answers gives up and frees the form", async ({ page, context }) => {
+  await context.clearCookies();
+  await page.clock.install();
+  await page.route("https://challenges.cloudflare.com/**", (route) => route.fulfill({
+    contentType: "text/javascript", body: "window.turnstile={render:()=>{window.rendered=true;return 'w'},remove(){}}",
+  }));
+  await page.goto("/chat");
+  await ask(page, "ส้มตำขอนแก่น");
+  await page.waitForFunction(() => (window as unknown as { rendered?: boolean }).rendered);
+  await page.clock.fastForward(31_000);
+  await expect(page.locator("main").getByRole("alert")).toContainText("ยืนยันว่าเป็นคนไม่สำเร็จ");
+  await expect(page.getByRole("button", { name: "ส่ง" })).toBeEnabled();
 });
 
 test("switching modes keeps the conversation, reloading forgets it", async ({ page }) => {

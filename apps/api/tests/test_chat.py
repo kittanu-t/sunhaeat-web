@@ -187,3 +187,55 @@ def test_cron_without_configured_secret_is_401(chat):
 def test_cron_runs(chat):
     r = chat().http.get("/internal/cron/daily", headers={"authorization": "Bearer cron-secret"})
     assert r.status_code == 200 and r.json()["restaurants"] == 6
+
+
+def test_unread_words_never_get_the_matched_wording(chat):
+    r = ask(chat(ai_enabled="false"), "อยากกินส้มตำห้องแอร์ ขอนแก่น")
+    assert r["partial"] is True and "ที่ตรงเงื่อนไข" not in r["text"] and len(r["result"]["matched"]) == 5
+
+
+def test_fully_read_question_is_not_partial(chat):
+    r = ask(chat(), "ส้มตำขอนแก่น")
+    assert r["partial"] is False and "ที่ตรงเงื่อนไข" in r["text"]
+
+
+@pytest.mark.parametrize("overrides,replies", [({"ai_enabled": "false"}, []), ({}, ["not json"]), ({}, [ProviderError("quota")])])
+def test_fallback_remembers_earlier_turns(chat, overrides, replies):
+    r = ask(chat(*replies, **overrides), "ขอเป็นขอนแก่น", ["ส้มตำ งบ 100"])
+    f = r["filters"]
+    assert (f["province_code"], f["tags"], f["budget_per_person"]) == ("TH-40", ["isan"], 100)
+    assert r["result"]["matched"] == [] and len(r["result"]["maybe"]) == 5
+
+
+def test_newest_turn_wins(chat):
+    f = ask(chat(ai_enabled="false"), "งบ 300 ก็ได้", ["ส้มตำโคราช งบ 100", "ขอเป็นขอนแก่น"])["filters"]
+    assert (f["province_code"], f["tags"], f["budget_per_person"]) == ("TH-40", ["isan"], 300)
+
+
+def test_naming_a_restaurant_drops_earlier_filters(chat):
+    f = ask(chat(ai_enabled="false"), "ขอข้อมูลร้าน ส้มตำร้าน 1", ["กาแฟโคราช งบ 50"])["filters"]
+    assert f["name"] == "ส้มตำร้าน 1" and f["province_code"] is None and f["tags"] == [] and f["budget_per_person"] is None
+
+
+def test_model_cannot_relax_an_earlier_budget(chat):
+    ids = [str(uuid.uuid5(uuid.NAMESPACE_URL, "tam-1"))]
+    r = ask(chat({"tags": ["isan"], "budget_per_person": 900}, {"ids": ids}), "ขอเป็นขอนแก่น", ["ส้มตำ งบ 100"])
+    assert r["mode"] == "ai" and r["filters"]["budget_per_person"] == 100
+
+
+def test_earlier_health_restriction_is_repeated_with_later_answers(chat):
+    r = ask(chat(ai_enabled="false"), "ส้มตำขอนแก่น", ["ฉันแพ้กุ้ง"])
+    assert "ต้องสอบถามร้าน" in r["text"] and r["partial"] is True
+
+
+def test_accounting_failure_after_an_answer_does_not_lose_it(chat, monkeypatch):
+    import psycopg
+
+    import app.chat.free as free
+
+    def broken(*_):
+        raise psycopg.OperationalError("gone")
+
+    monkeypatch.setattr(free, "settle", broken)
+    ids = [str(uuid.uuid5(uuid.NAMESPACE_URL, "tam-1"))]
+    assert ask(chat({"tags": ["isan"]}, {"ids": ids}), "แนะนำหน่อย")["mode"] == "ai"

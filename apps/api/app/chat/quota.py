@@ -1,11 +1,10 @@
 """Rate limits and daily AI budget, enforced atomically in Postgres."""
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, timedelta, timezone
 
 from psycopg import Connection, Rollback
 
-BANGKOK = ZoneInfo("Asia/Bangkok")
+BANGKOK = timezone(timedelta(hours=7))  # no daylight saving, so no timezone database needed
 
 
 @dataclass(frozen=True)

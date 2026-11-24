@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { BROKEN } from "../playwright.config";
-import { expect, test } from "./fixtures";
+import { expect, showMap, test } from "./fixtures";
 
 const cards = "article[data-place]";
 
@@ -14,6 +14,7 @@ test("search by word and province shows the same places as cards and pins", asyn
   await expect(results).toHaveCount(2);
   const shown = await results.locator("h3").allInnerTexts();
   expect(shown).toContain("ร้านส้มตำระเบิด");
+  await showMap(page);
   await expect(page.locator("button[data-pin]")).toHaveCount(2);
   const pins = await page.locator("button[data-pin]").evaluateAll((all) => all.map((b) => b.getAttribute("aria-label")!));
   expect(pins.sort()).toEqual([...shown].sort());
@@ -28,6 +29,7 @@ test("a shared link restores the filters", async ({ page }) => {
 
 test("choosing a pin focuses its card", async ({ page }) => {
   await page.goto("/?province=TH-30");
+  await showMap(page);
   const pin = page.locator("button[data-pin]").first();
   const name = await pin.getAttribute("aria-label");
   await pin.focus();
@@ -55,6 +57,33 @@ test("location stays out of the URL and is rounded before it leaves the page", a
   expect(page.url()).not.toContain("16.43");
 });
 
+test("phones download no map until asked", async ({ page }) => {
+  const tiles: string[] = [];
+  page.on("request", (r) => { if (r.url().includes("openfreemap")) tiles.push(r.url()); });
+  await page.goto("/?province=TH-30");
+  await expect(page.getByRole("region", { name: "ผลการค้นหา" }).locator(cards)).toHaveCount(3);
+  await page.waitForTimeout(1500);
+  if (page.viewportSize()!.width < 960) expect(tiles).toEqual([]);
+  await showMap(page);
+  await expect.poll(() => tiles.length).toBeGreaterThan(0);
+});
+
+test("searching the visible area keeps coordinates out of the URL", async ({ page }) => {
+  await page.goto("/?province=TH-30");
+  await showMap(page);
+  await expect(page.locator("button[data-pin]")).toHaveCount(3);
+  await page.getByRole("button", { name: "Zoom out" }).click();
+  const box = (await page.locator(".maplibregl-canvas").boundingBox())!;
+  await page.mouse.move(box.x + 60, box.y + 60);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 75, box.y + 70, { steps: 5 });
+  await page.mouse.up();
+  const sent = page.waitForRequest("**/api/near");
+  await page.getByRole("button", { name: "ค้นหาในบริเวณนี้" }).click();
+  expect((await sent).postDataJSON().bbox).toHaveLength(4);
+  await expect(page.getByRole("status")).toContainText("บริเวณที่เห็น");
+});
+
 test("no match says so and offers a way out", async ({ page }) => {
   await page.goto("/?q=ไม่มีร้านชื่อนี้แน่นอน");
   await expect(page.getByText("ยังไม่พบร้าน")).toBeVisible();
@@ -76,6 +105,7 @@ test("the list works without WebGL", async ({ page }) => {
     } as typeof original;
   });
   await page.goto("/?province=TH-30");
+  await showMap(page);
   await expect(page.getByText("อุปกรณ์นี้แสดงแผนที่ไม่ได้")).toBeVisible();
   await expect(page.getByRole("region", { name: "ผลการค้นหา" }).locator(cards)).toHaveCount(3);
 });

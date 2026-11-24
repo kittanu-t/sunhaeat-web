@@ -8,6 +8,10 @@ from app.search.normalize import normalize_name
     ("Café", "cafe\u0301"),
     ("ส้มต\u0e4d\u0e32", "ส้มตำ"),
     ("KFC\u200b", "kfc"),
+    ("\u0e40\u0e40จ่วฮ้อน", "แจ่วฮ้อน"),
+    ("น\u0e4d\u0e49\u0e32ตก", "น้ำตก"),
+    ("น\u0e49\u0e4d\u0e32ตก", "น้ำตก"),
+    ("น\u0e33\u0e49ตก", "น้ำตก"),
     ("\ufeffบ้าน\u00a0ญาติ", "บ้านญาติ"),
 ])
 def test_equivalent_spellings(a, b):

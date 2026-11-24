@@ -44,7 +44,7 @@ export default async function PlacePage({ params }: Props) {
         <p role="alert">ฐานข้อมูลอาจพักอยู่ ลองใหม่ในอีกไม่กี่นาที</p>
       </div>
     );
-  const nearby = await getNearby(slug);
+  const nearby = place.is_demo ? [] : await getNearby(slug); // a fictional place has no real neighbours
   const maps = `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}`;
   return (
     <div className="place">

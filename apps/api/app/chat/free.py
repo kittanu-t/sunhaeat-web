@@ -1,9 +1,11 @@
 """Free-text chat: rules first, Gemini only when they are not enough, rules again when Gemini fails."""
+import logging
 import time
 from datetime import UTC, datetime
 from typing import Literal
 
-from psycopg_pool import ConnectionPool
+import psycopg
+from psycopg_pool import ConnectionPool, PoolTimeout
 from pydantic import BaseModel
 
 from app.chat.gemini import GeminiClient, ProviderError, Transport
@@ -12,6 +14,8 @@ from app.models import Filters, Place, SearchResult
 from app.search.parse import parse_rules, requires_verified_details
 from app.search.repository import search
 from app.settings import Settings
+
+log = logging.getLogger("sunhaeat")
 
 TOTAL_DEADLINE_S = 20
 CLARIFY = "ลองระบุจังหวัด ประเภทอาหาร หรืองบต่อคน เช่น “ส้มตำขอนแก่น งบ 100”"
@@ -26,13 +30,16 @@ class ChatReply(BaseModel):
     filters: Filters
     result: SearchResult
     disclaimer: str = DISCLAIMER
+    partial: bool = False  # some of what was asked could not be applied
     ai_unavailable: Literal["off", "limit", "error"] | None = None
     ai_code: str | None = None
 
 
-def describe(filters: Filters, result: SearchResult) -> str:
+def describe(result: SearchResult, partial: bool = False) -> str:
     """Template text only; it never repeats a restaurant name or model output."""
-    if result.matched:
+    if result.matched and partial:
+        parts = [f"แสดง {len(result.matched)} ร้านจากเงื่อนไขเท่าที่อ่านได้ ยังมีคำขอบางส่วนที่ระบบไม่ได้ใช้กรอง"]
+    elif result.matched:
         parts = [f"แสดง {len(result.matched)} ร้านที่ตรงเงื่อนไข"]
         if result.maybe:
             parts.append(f"และอีก {len(result.maybe)} ร้านที่อาจตรงแต่ไม่ทราบราคา")
@@ -47,6 +54,21 @@ def describe(filters: Filters, result: SearchResult) -> str:
 
 def _usable(f: Filters) -> bool:
     return bool(f.name or f.province_code or f.tags or f.budget_per_person)
+
+
+def rules_for(text: str, history: list[str]) -> Filters:
+    """What the user has stated so far; the newest value of each condition wins."""
+    current = parse_rules(text)
+    if current.name:
+        return current
+    said: dict = {}
+    for earlier in (*map(parse_rules, history), current):
+        if earlier.name:
+            said = {}
+            continue
+        stated = {"province_code": earlier.province_code, "tags": earlier.tags, "budget_per_person": earlier.budget_per_person}
+        said |= {k: v for k, v in stated.items() if v}
+    return current.model_copy(update=said)
 
 
 def _merge(model: Filters, rules: Filters) -> Filters:
@@ -78,16 +100,26 @@ def _rules_reply(pool: ConnectionPool, rules: Filters, **why) -> ChatReply:
     if not _usable(rules):
         return ChatReply(mode="rules", text=CLARIFY, filters=rules, result=SearchResult(), **why)
     result = _find(pool, rules)
-    text = describe(rules, result)
-    if rules.needs_clarification and CLARIFY not in text:
+    partial = rules.needs_clarification
+    text = describe(result, partial)
+    if partial and CLARIFY not in text:
         text = f"{text} {CLARIFY}"
-    return ChatReply(mode="rules", text=text, filters=rules, result=result, **why)
+    return ChatReply(mode="rules", text=text, filters=rules, result=result, partial=partial, **why)
 
 
 def answer_free(pool: ConnectionPool, settings: Settings, transport: Transport | None, text: str, history: list[str],
                 session: str, ip: str) -> ChatReply:
+    reply = _answer(pool, settings, transport, text, history, session, ip)
+    if not requires_verified_details(text) and any(map(requires_verified_details, history)):
+        # An allergy or similar stated earlier still applies, and still cannot be checked.
+        reply = reply.model_copy(update={"partial": True, "text": f"{reply.text} {ASK_RESTAURANT}"})
+    return reply
+
+
+def _answer(pool: ConnectionPool, settings: Settings, transport: Transport | None, text: str, history: list[str],
+                session: str, ip: str) -> ChatReply:
     deadline = time.monotonic() + TOTAL_DEADLINE_S
-    rules = parse_rules(text)
+    rules = rules_for(text, history)
     if requires_verified_details(text):
         return ChatReply(mode="rules", text=ASK_RESTAURANT, filters=rules, result=SearchResult())
     if not rules.needs_clarification and not history:
@@ -111,12 +143,16 @@ def answer_free(pool: ConnectionPool, settings: Settings, transport: Transport |
         candidates = result.matched + result.maybe
         if len(candidates) > 3 and time.monotonic() + settings.ai_timeout_s < deadline:
             result = _pick(result, client.select(text, candidates))
-        return ChatReply(mode="ai", text=describe(filters, result), filters=filters, result=result)
+        return ChatReply(mode="ai", text=describe(result, filters.needs_clarification), filters=filters,
+                         result=result, partial=filters.needs_clarification)
     except ProviderError as e:
         if e.code in ("quota", "auth"):
             with pool.connection() as conn:
                 block_ai(conn, now)
         return _rules_reply(pool, rules, ai_unavailable="error", ai_code=e.code)
     finally:
-        with pool.connection() as conn:
-            settle(conn, reservation, client.tokens)
+        try:
+            with pool.connection() as conn:
+                settle(conn, reservation, client.tokens)
+        except (psycopg.OperationalError, PoolTimeout):
+            log.warning("chat token accounting failed")  # the request itself is already counted

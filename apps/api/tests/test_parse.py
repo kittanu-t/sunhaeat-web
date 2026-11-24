@@ -65,3 +65,36 @@ def test_unverifiable_requests(text):
 @pytest.mark.parametrize("text", ["ร้านเจ๊แดง", "ส้มตำขอนแก่น", "ร้านกาแฟโคราช"])
 def test_ordinary_requests_are_not_flagged(text):
     assert not requires_verified_details(text)
+
+
+@pytest.mark.parametrize("text", [
+    "ร้านไหนไม่มีถั่วในขอนแก่น", "ร้านเปิดดึกขอนแก่น", "ส้มตำขอนแก่น peanut allergy", "ขอคาเฟ่เปิด 24 ชั่วโมง อุดร", "กาแฟโคราชเปิดหลังเที่ยงคืน",
+    "ก๋วยเตี๋ยวไม่ใช้ผงชูรสอุบล",
+])
+def test_more_unverifiable_requests(text):
+    assert requires_verified_details(text)
+
+
+@pytest.mark.parametrize("text", [
+    "อยากกินแกงเขียวหวาน ขอนแก่น", "คาเฟ่ใกล้ฉัน", "ร้านนั่งชิลวิวสวยโคราช", "ส้มตำขอนแก่นที่มีห้องแอร์", "coffee with wifi ขอนแก่น",
+])
+def test_words_it_cannot_read_make_the_request_unclear(text):
+    assert parse_rules(text).needs_clarification
+
+
+@pytest.mark.parametrize("text", [
+    "ส้มตำขอนแก่น", "ขอร้านก๋วยเตี๋ยวแถวอุบลหน่อยครับ งบ 60 บาท", "มีร้านกาแฟในโคราชไหมคะ", "อยากกินชาบูที่อุดร ไปกัน 4 คน งบรวม 1000 บาท",
+    "แนะนำซูชิร้อยเอ็ดให้หน่อย", "หมูกระทะขอนแก่น คนละไม่เกิน 250", "กินข้าวต้มจังหวัดเลย",
+])
+def test_fully_read_requests_stay_clear(text):
+    assert not parse_rules(text).needs_clarification
+
+
+@pytest.mark.parametrize("text", ["คาเฟ่ไม่เกิน 5 กม. ขอนแก่น", "กาแฟไม่เกิน 10 นาทีจากอุดร", "ส้มตำโคราช ไม่เกิน 4 คน", "คาเฟ่ไม่เกิน 500 เมตร อุบล"])
+def test_distance_time_and_people_are_not_a_budget(text):
+    assert parse_rules(text).budget_per_person is None
+
+
+@pytest.mark.parametrize("text,tag", [("เเจ่วฮ้อนขอนแก่น", "isan"), ("ขนมจีนนํ้ายาโคราช", "noodle"), ("ส้มตําอุดร", "isan")])
+def test_misencoded_thai_is_read(text, tag):
+    assert parse_rules(text).tags == [tag]

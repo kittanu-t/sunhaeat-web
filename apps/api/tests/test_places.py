@@ -82,6 +82,19 @@ def test_near_search_by_post_keeps_coordinates_out_of_the_url(api, catalog):
     assert api.post("/v1/search", {"budget_per_person": 5}).status_code == 422
 
 
+def test_area_search_by_post(api, catalog):
+    r = api.post("/v1/search", {"bbox": [102.8, 16.4, 102.9, 16.5]})
+    assert [p["slug"] for p in r.json()["places"]] == ["tam"]
+    for bad in ({"bbox": [103, 16, 102, 17]}, {"bbox": [1, 2, 3]}, {}, {"bbox": [102, 16, 103, 17], "near": {"lat": 16, "lon": 102}}):
+        assert api.post("/v1/search", bad).status_code == 422
+
+
+def test_dropped_idle_connections_do_not_reach_visitors(api, db, catalog):
+    assert api.get("/v1/places").status_code == 200
+    db.execute("select pg_terminate_backend(pid) from pg_stat_activity where usename = 'api_runtime'")
+    assert [api.get("/v1/places").status_code for _ in range(3)] == [200, 200, 200]
+
+
 def test_detail_has_sources_and_unknowns_are_null(api, catalog):
     p = api.get("/v1/places/tam").json()
     assert p["price_max"] is None and p["menu"] == [] and p["hours"] == []

@@ -112,6 +112,8 @@ def test_sdk_transport_sends_bounded_json_request(monkeypatch):
     assert seen["model"] == "model-x" and json.loads(seen["contents"]) == {"text": "ก"}
     assert seen["config"].max_output_tokens == 512 and seen["config"].response_mime_type == "application/json"
     assert not seen["config"].tools
+    # The SDK forwards this as a server deadline; keep it at 10 s or more. The 6 s wall clock is ours.
+    assert t.client._api_client._http_options.timeout >= 10_000
 
 
 def test_sdk_errors_never_carry_provider_text(monkeypatch):

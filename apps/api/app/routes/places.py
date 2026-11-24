@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, model_validator
 
 from app.db import Cur
 from app.models import Near, ProvinceCode, Strict
@@ -9,6 +9,7 @@ from app.search import repository as repo
 from app.search.tags import LABELS, TAGS
 
 router = APIRouter(prefix="/v1")
+Degrees = Annotated[float, Field(ge=-180, le=180, allow_inf_nan=False)]
 
 
 def _floats(raw: str, count: int) -> list[float]:
@@ -46,18 +47,29 @@ def places(cur: Cur, q: Annotated[str | None, Query(max_length=100)] = None, pro
                                        near=_near(near) if near else None, demo=demo, limit=limit)}
 
 
-class NearSearch(Strict):
-    near: Near
+class AreaSearch(Strict):
+    near: Near | None = None
+    bbox: tuple[Degrees, Degrees, Degrees, Degrees] | None = None
     q: Annotated[str, Field(max_length=100)] | None = None
     tags: list[str] = Field(default_factory=list, max_length=15)
 
+    @model_validator(mode="after")
+    def one_valid_area(self):
+        if (self.near is None) == (self.bbox is None):
+            raise ValueError("give near or bbox")
+        if self.bbox is not None:
+            w, s, e, n = self.bbox
+            if not (w < e <= 180 and -90 <= s < n <= 90):
+                raise ValueError("bad bbox")
+        return self
+
 
 @router.post("/search")
-def near_search(cur: Cur, body: NearSearch) -> dict:
+def area_search(cur: Cur, body: AreaSearch) -> dict:
     """POST so a visitor's coordinates never appear in URL logs."""
     if set(body.tags) - set(TAGS):
         raise HTTPException(422, "unknown_tag")
-    return {"places": repo.list_places(cur, name=body.q, tags=body.tags, near=body.near, limit=100)}
+    return {"places": repo.list_places(cur, name=body.q, tags=body.tags, near=body.near, bbox=body.bbox, limit=100)}
 
 
 @router.get("/places/{slug}")

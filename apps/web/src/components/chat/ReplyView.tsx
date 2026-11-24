@@ -22,8 +22,9 @@ function understood({ filters: f }: ChatReply): string[] {
 
 export function ReplyView({ reply }: { reply: ChatReply }) {
   const facts = understood(reply);
+  const full = reply.partial ? "ตรงเฉพาะบางเงื่อนไข" : "ตรงเงื่อนไข";
   const lanes = [
-    ["ตรงเงื่อนไข", reply.result.matched], ["อาจตรง ไม่ทราบราคา", reply.result.maybe], [DEMO_LABEL, reply.result.demo],
+    [full, reply.result.matched], ["อาจตรง ไม่ทราบราคา", reply.result.maybe], [DEMO_LABEL, reply.result.demo],
   ] as const;
   return (
     <div className="reply">

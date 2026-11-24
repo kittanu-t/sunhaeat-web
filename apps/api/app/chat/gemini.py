@@ -63,7 +63,8 @@ def code_for(error: errors.APIError) -> str:
 class SdkTransport:
     def __init__(self, api_key: str, model: str, timeout_s: float):
         self.model = model
-        self.client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=int(timeout_s * 1000)))
+        # Also sent as the server deadline, which may not go below 10 s; GeminiClient enforces timeout_s itself.
+        self.client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=max(10_000, int(timeout_s * 1000))))
 
     def generate(self, system: str, payload: dict, schema: dict) -> tuple[str, int]:
         try:

@@ -91,3 +91,9 @@ def test_cleanup_removes_only_old_rows(db):
         cleanup(conn, NOW)
     assert db.scalar("select count(*) from app.rate_limits") == 1
     assert db.scalar("select count(distinct day) from app.ai_usage") == 1
+
+
+def test_bangkok_day_needs_no_timezone_database():
+    import app.chat.quota as quota
+
+    assert quota.BANGKOK.utcoffset(NOW) == timedelta(hours=7) and type(quota.BANGKOK).__name__ == "timezone"

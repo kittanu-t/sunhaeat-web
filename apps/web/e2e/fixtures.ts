@@ -21,4 +21,9 @@ export const test = base.extend({
     expect(problems).toEqual([]);
   },
 });
+/** Phones load the map only when asked; desktops load it with the page. */
+export async function showMap(page: import("@playwright/test").Page) {
+  const show = page.getByRole("button", { name: "แสดงแผนที่" });
+  if (page.viewportSize()!.width < 960) await show.click();
+}
 export { expect };

@@ -13,6 +13,7 @@ from pipeline.tagging import TAGS, clean_text, slug_for, tags_for
     ("Destiny Cafe", "coffee_shop", ["coffee"]),
     ("ครัวปู่ทอง", "restaurant", []),
     ("ร้านเจ๊ก้อย", "restaurant", []),
+    ("ร้าน\u0e40\u0e40จ่วฮ้อน", "restaurant", ["isan"]),
     ("ลาบก้อยอุบล", "restaurant", ["isan"]),
     ("ร้านอาหารตำบลด่าน", "restaurant", []),
     ("Tatsu Khao Yai", "japanese_restaurant", ["japanese"]),

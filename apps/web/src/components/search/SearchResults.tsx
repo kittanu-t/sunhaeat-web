@@ -16,8 +16,8 @@ interface Props {
 
 const PROBLEM = "ค้นหาไม่สำเร็จ ลองอีกครั้งในอีกสักครู่";
 
-async function load(request: Promise<Response>): Promise<Place[]> {
-  const response = await request;
+async function load(area: object): Promise<Place[]> {
+  const response = await fetch("/api/near", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(area) });
   if (!response.ok) throw new Error(String(response.status));
   return PlaceList.parse(await response.json()).places;
 }
@@ -38,6 +38,8 @@ export function SearchResults({ initial, q, tag, filtered, children }: Props) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const filters = { ...(q ? { q } : {}), ...(tag ? { tags: [tag] } : {}) };
+
   async function update(work: () => Promise<Place[]>, done: (n: number) => string) {
     setBusy(true);
     setStatus("กำลังค้นหา…");
@@ -56,18 +58,10 @@ export function SearchResults({ initial, q, tag, filtered, children }: Props) {
 
   const near = () => update(async () => {
     const position = await currentPosition().catch(() => { throw new Error("location"); });
-    const body = JSON.stringify({
-      lat: round(position.coords.latitude), lon: round(position.coords.longitude), ...(q ? { q } : {}), ...(tag ? { tags: [tag] } : {}),
-    });
-    return load(fetch("/api/near", { method: "POST", headers: { "content-type": "application/json" }, body }));
+    return load({ lat: round(position.coords.latitude), lon: round(position.coords.longitude), ...filters });
   }, (n) => `พบ ${n} ร้านในระยะ 5 กม. จากตำแหน่งโดยประมาณของคุณ`);
 
-  const here = (bounds: Bounds) => update(() => {
-    const query = new URLSearchParams({ bbox: bounds.map((n) => n.toFixed(4)).join(","), limit: "100" });
-    if (q) query.set("q", q);
-    if (tag) query.set("tag", tag);
-    return load(fetch(`/api/places?${query}`));
-  }, (n) => `พบ ${n} ร้านในบริเวณที่เห็นบนแผนที่`);
+  const here = (bbox: Bounds) => update(() => load({ bbox, ...filters }), (n) => `พบ ${n} ร้านในบริเวณที่เห็นบนแผนที่`);
 
   function choose(slug: string) {
     setSelected(slug);

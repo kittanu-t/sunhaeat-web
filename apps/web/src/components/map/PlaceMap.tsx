@@ -1,11 +1,12 @@
 "use client";
 
 import type { LngLatBoundsLike, Map as MapLibre, Marker } from "maplibre-gl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Place } from "@/lib/contracts";
 
 const STYLE = process.env.NEXT_PUBLIC_MAP_STYLE || "https://tiles.openfreemap.org/styles/liberty";
 const ISAN: LngLatBoundsLike = [[100.8, 14.0], [105.7, 18.5]];
+const WIDE = "(min-width: 960px)"; // same breakpoint as globals.css
 export type Bounds = [west: number, south: number, east: number, north: number];
 
 interface Props {
@@ -16,6 +17,12 @@ interface Props {
   onMove?: (bounds: Bounds) => void;
   label: string;
   children?: React.ReactNode;
+}
+
+function subscribeWide(notify: () => void): () => void {
+  const query = matchMedia(WIDE);
+  query.addEventListener("change", notify);
+  return () => query.removeEventListener("change", notify);
 }
 
 function boundsOf(places: Place[]): LngLatBoundsLike {
@@ -30,12 +37,16 @@ export function PlaceMap({ places, selected = null, onSelect, onMove, label, chi
   const markers = useRef<Marker[]>([]);
   const [map, setMap] = useState<MapLibre | null>(null);
   const [failed, setFailed] = useState(false);
+  const [asked, setAsked] = useState(false);
+  const wide = useSyncExternalStore(subscribeWide, () => matchMedia(WIDE).matches, () => false);
+  const started = wide || asked; // the map is about 1.5 MB, so phones fetch it only when asked
   const callbacks = useRef({ onSelect, onMove });
   useEffect(() => {
     callbacks.current = { onSelect, onMove };
   });
 
   useEffect(() => {
+    if (!started) return;
     let disposed = false;
     let created: MapLibre | undefined;
     (async () => {
@@ -61,7 +72,7 @@ export function PlaceMap({ places, selected = null, onSelect, onMove, label, chi
       created?.remove();
       setMap(null);
     };
-  }, []);
+  }, [started]);
 
   useEffect(() => {
     if (!map) return;
@@ -94,8 +105,9 @@ export function PlaceMap({ places, selected = null, onSelect, onMove, label, chi
   }, [selected, places, map]);
 
   return (
-    <div className="map" role="region" aria-label={label}>
+    <div className={started ? "map" : "map idle"} role="region" aria-label={label}>
       <div className="canvas" ref={box} />
+      {!started && <button type="button" className="button" onClick={() => setAsked(true)}>แสดงแผนที่</button>}
       {failed && <p className="notice">อุปกรณ์นี้แสดงแผนที่ไม่ได้ แต่ยังดูรายชื่อร้านได้ตามปกติ</p>}
       {children}
     </div>

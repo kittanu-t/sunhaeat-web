@@ -57,6 +57,7 @@ export const ChatReply = z.object({
   filters: Filters,
   result: SearchResult,
   disclaimer: z.string(),
+  partial: z.boolean(),
   ai_unavailable: z.enum(["off", "limit", "error"]).nullable(),
 });
 
@@ -85,12 +86,15 @@ export const GuidedResponse = z.object({
   prompt: z.object({ text: z.string(), options: z.array(z.string()) }).nullable(),
   reply: ChatReply.nullable(),
 });
-export const NearRequest = z.strictObject({
-  lat: z.number().min(-90).max(90),
-  lon: z.number().min(-180).max(180),
+const areaFilters = {
   q: z.string().trim().min(1).max(100).optional(),
   tags: z.array(z.string().max(30)).max(15).optional(),
-});
+};
+const degrees = z.number().min(-180).max(180);
+export const NearRequest = z.union([
+  z.strictObject({ lat: z.number().min(-90).max(90), lon: degrees, ...areaFilters }),
+  z.strictObject({ bbox: z.tuple([degrees, degrees, degrees, degrees]), ...areaFilters }),
+]);
 export const SessionRequest = z.strictObject({ token: z.string().min(1).max(4096) });
 
 export type Place = z.infer<typeof Place>;

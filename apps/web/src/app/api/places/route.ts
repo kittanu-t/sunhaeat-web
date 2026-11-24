@@ -1,7 +1,7 @@
 import { callApi, callerOf, respond } from "@/lib/api";
 import { PlaceList } from "@/lib/contracts";
 
-const PARAMS = new Set(["q", "province", "tag", "bbox", "demo", "limit"]);
+const PARAMS = new Set(["q", "province", "tag", "demo", "limit"]);
 
 export function GET(request: Request): Promise<Response> {
   return respond(async () => {

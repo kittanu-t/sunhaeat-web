@@ -1,7 +1,7 @@
 import pytest
 
 from eval.metrics import constraint_violations, percentile, recall_at_k, slot_f1
-from eval.run import CallBudget, OutOfCalls
+from eval.run import CallBudget, OutOfCalls, ran_fully
 
 GOLD = [{"tags": ["isan"], "province_code": "TH-40"}, {"budget_per_person": 100}]
 PRED = [{"tags": ["isan"]}, {}]
@@ -72,3 +72,22 @@ def test_call_budget_stops_and_reports_incomplete():
     with pytest.raises(OutOfCalls):
         budget.spend()
     assert budget.used == 2
+
+
+@pytest.mark.parametrize("answer", [{"ai_unavailable": "limit", "ai_code": None}, {"ai_unavailable": "error", "ai_code": "quota"},
+                                    {"ai_unavailable": "off", "ai_code": None}, {"ai_unavailable": "error", "ai_code": "auth"}])
+def test_a_gemini_run_that_lost_the_model_is_incomplete(answer):
+    good = {"ai_unavailable": None, "ai_code": None}
+    assert ran_fully("gemini", [good, {"ai_unavailable": "error", "ai_code": "schema"}])
+    assert not ran_fully("gemini", [good, answer])
+    assert ran_fully("rules", [answer])
+
+
+def test_dropping_a_stated_budget_is_a_violation_against_gold():
+    from eval.metrics import gold_violations
+
+    gold = {"province_code": "TH-40", "budget_per_person": 100}
+    shown = [place(price_max=None, lane="matched")]
+    assert constraint_violations({"province_code": "TH-40"}, shown) == 0  # self-consistent, yet wrong
+    assert gold_violations(gold, shown) == 1
+    assert gold_violations(gold, [place(price_max=None, lane="maybe")]) == 0

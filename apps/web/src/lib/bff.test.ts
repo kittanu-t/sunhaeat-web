@@ -18,7 +18,7 @@ const place = {
   price_max: null, is_demo: false, distance_m: null,
 };
 const filters = { name: null, province_code: "TH-40", tags: ["isan"], terms: [], near: null, budget_per_person: null, needs_clarification: false };
-const reply = { mode: "rules", text: "พบ 1 ร้าน", filters, result: { matched: [place], maybe: [], demo: [] }, disclaimer: "d", ai_unavailable: null, ai_code: null };
+const reply = { mode: "rules", text: "พบ 1 ร้าน", filters, result: { matched: [place], maybe: [], demo: [] }, disclaimer: "d", partial: false, ai_unavailable: null, ai_code: null };
 
 let upstream: { url: string; init: RequestInit }[];
 let answer: () => Response | Promise<Response>;
@@ -87,7 +87,7 @@ describe("places", () => {
   });
 
   it("never forwards coordinates from a URL", async () => {
-    await getPlaces(new Request(`${ORIGIN}/api/places?near=16.4,102.8,500`));
+    await getPlaces(new Request(`${ORIGIN}/api/places?near=16.4,102.8,500&bbox=102.8,16.4,102.9,16.5`));
     expect(upstream[0].url).toBe("https://api.test/v1/places");
   });
 
@@ -98,7 +98,13 @@ describe("places", () => {
     expect(JSON.parse(String(upstream[0].init.body))).toEqual({ near: { lat: 16.432, lon: 102.835, radius_m: 5000 }, tags: ["isan"] });
   });
 
-  it.each([[{ lat: 91, lon: 1 }], [{ lat: 1 }], [{ lat: "1", lon: 1 }]])("rejects near search %j", async (body) => {
+  it("sends a map-area search by POST", async () => {
+    const bbox = [102.8, 16.4, 102.9, 16.5];
+    expect((await postNear(post("/api/near", { bbox, q: "ตำ" }))).status).toBe(200);
+    expect(JSON.parse(String(upstream[0].init.body))).toEqual({ bbox, q: "ตำ" });
+  });
+
+  it.each([[{ lat: 91, lon: 1 }], [{ bbox: [1, 2, 3] }], [{ bbox: [1, 2, 3, "4"] }], [{ lat: 1, lon: 1, bbox: [1, 2, 3, 4] }], [{}], [{ lat: 1 }], [{ lat: "1", lon: 1 }]])("rejects near search %j", async (body) => {
     expect((await postNear(post("/api/near", body))).status).toBe(400);
     expect((await postNear(post("/api/near", { lat: 1, lon: 1 }, { origin: "https://evil.test" }))).status).toBe(403);
     expect(upstream).toHaveLength(0);

@@ -1,8 +1,10 @@
 """Food tags and the Thai words that signal them, shared by the dataset build and the query parser."""
 import re
 
+from app.search.normalize import canonical_thai
+
 _RULES: dict[str, tuple[str, str]] = {
-    "noodle": ("ก๋วยเตี๋ยว/เส้น", r"เตี๋ยว|ราดหน้า|บะหมี่|เย็นตาโฟ|ก๋วยจั๊บ|ขนมจีน|noodle"),
+    "noodle": ("ก๋วยเตี๋ยว/เส้น", r"(?:ก[๋๊]?วย)?เตี๋ยว|ราดหน้า|บะหมี่|เย็นตาโฟ|ก๋วยจั๊บ|ขนมจีน|noodle"),
     "isan": ("อีสาน/ส้มตำ", r"ส้มตำ|ส้มต่อน|ตำ[เแ]|ตำนัว|ตำปู|ลาบ"
              r"|(?<!เจ๊)(?<!พี่)(?<!ป้า)(?<!แม่)(?<!น้อง)(?<!ครัว)ก้อย|แจ่ว|ไก่ย่าง|ปลาเผา|อีสาน"),
     "hotpot_grill": ("หมูกระทะ/ชาบู", r"หมูกระทะ|หมูกะทะ|ชาบู|shabu|สุกี้|suki\b|ปิ้งย่าง|เนื้อย่าง|บาร์บีคิว|\bbbq\b"
@@ -27,4 +29,12 @@ _COMPILED = {tag: re.compile(rule, re.IGNORECASE) for tag, (_, rule) in _RULES.i
 
 
 def tags_in(text: str) -> list[str]:
+    text = canonical_thai(text)
     return [tag for tag, rule in _COMPILED.items() if rule.search(text)]
+
+
+def without_tag_words(text: str) -> str:
+    text = canonical_thai(text)
+    for rule in _COMPILED.values():
+        text = rule.sub(" ", text)
+    return text

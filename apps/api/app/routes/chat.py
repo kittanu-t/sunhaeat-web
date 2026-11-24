@@ -77,6 +77,6 @@ def guided(request: Request, body: GuidedRequest) -> GuidedResponse:
         filters = to_filters(state)
         with pool_of(request).connection() as conn, conn.cursor() as cur:
             result = search(cur, filters)
-        text = " ".join(filter(None, [describe(filters, result), budget_note(state), restriction_note(state)]))
+        text = " ".join(filter(None, [describe(result), budget_note(state), restriction_note(state)]))
         reply = ChatReply(mode="rules", text=text, filters=filters, result=result)
     return GuidedResponse(state=state, prompt=prompt_for(state), reply=reply)

@@ -51,6 +51,11 @@ def constraint_violations(filters: dict, places: list[dict]) -> int:
     return bad
 
 
+def gold_violations(gold: dict, places: list[dict]) -> int:
+    """Shown places that break what the question really asked, whatever the system understood."""
+    return constraint_violations(gold, places)
+
+
 def percentile(values: list[float], p: int) -> float | None:
     if not values:
         return None
