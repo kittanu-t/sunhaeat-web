@@ -121,7 +121,7 @@ def main() -> None:
     git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True)  # noqa: S607
     report = {
         "system": o.system, "split": o.split, "complete": complete, "at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "commit": git.stdout.strip(), "model": settings.gemini_model if o.system == "gemini" else None, "dataset_sha256": manifest["sha256"],
+        "commit": git.stdout.strip(), "model": settings.gemini_model or None, "dataset_sha256": manifest["sha256"],
         "questions_sha256": hashlib.sha256(QUESTIONS.read_bytes()).hexdigest(), "calls": budget.used,
         "tokens": transport.tokens if transport else 0, **score(questions[:len(answers)], answers),
     }

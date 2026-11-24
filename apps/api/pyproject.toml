@@ -27,3 +27,6 @@ package = false
 testpaths = ["tests", "../../pipeline/tests", "../../eval/tests"]
 pythonpath = [".", "../.."]
 addopts = "-q --import-mode=importlib"
+
+[tool.vercel]
+entrypoint = "index:app"

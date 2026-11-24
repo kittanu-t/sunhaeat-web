@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </header>
         <main id="main">{children}</main>
         <footer className="foot">
-          ข้อมูลร้านจาก Overture Maps (Meta, AllThePlaces, Foursquare, Microsoft) ยังไม่ยืนยันว่าร้านเปิดอยู่จริง{" "}
+          ข้อมูลร้านจาก Overture Maps (Meta, AllThePlaces, Microsoft) ยังไม่ยืนยันว่าร้านเปิดอยู่จริง{" "}
           <Link href="/about">แหล่งข้อมูลและข้อจำกัด</Link>
         </footer>
       </body>

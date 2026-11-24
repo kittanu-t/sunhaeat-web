@@ -1,0 +1,9 @@
+SunHaEat Web uses data that is not part of this repository.
+
+Places: Overture Maps Foundation, Places theme, release 2026-11-18.0 (https://overturemaps.org).
+  Meta and Microsoft records: CDLA-Permissive-2.0, https://cdla.dev/permissive-2-0/
+  AllThePlaces records: CC0-1.0, https://creativecommons.org/publicdomain/zero/1.0/
+  Changes made: filtered to eateries in 20 Thai provinces, cleaned, deduplicated, retagged; phone numbers removed.
+Province boundaries: Overture Divisions theme (includes OpenStreetMap data, ODbL), used only to assign a province code.
+Map tiles: OpenFreeMap (https://openfreemap.org), (c) OpenMapTiles, data (c) OpenStreetMap contributors, ODbL.
+Fonts: IBM Plex Sans Thai Looped and Pattaya, SIL Open Font License 1.1.

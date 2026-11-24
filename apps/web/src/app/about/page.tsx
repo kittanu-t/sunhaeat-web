@@ -12,7 +12,7 @@ export default function About() {
       </p>
       <h2>ข้อมูลมาจากไหน</h2>
       <ul>
-        <li>ร้าน: <a href="https://overturemaps.org">Overture Maps</a> Places รุ่น 2026-11-18.0 จาก Meta และ Microsoft (CDLA-Permissive-2.0), AllThePlaces (CC0-1.0), Foursquare (Apache-2.0) ผ่านการคัดกรอง ตัดซ้ำ และติดแท็กใหม่</li>
+        <li>ร้าน: <a href="https://overturemaps.org">Overture Maps</a> Places รุ่น 2026-11-18.0 จาก Meta และ Microsoft (CDLA-Permissive-2.0), AllThePlaces (CC0-1.0) ผ่านการคัดกรอง ตัดซ้ำ และติดแท็กใหม่</li>
         <li>แผนที่: <a href="https://openfreemap.org">OpenFreeMap</a>, © OpenMapTiles, ข้อมูลจาก <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></li>
         <li>ร้านที่มีป้าย “ร้านตัวอย่าง (สมมติ)” แต่งขึ้นทั้งหมด 12 ร้าน</li>
       </ul>
@@ -22,6 +22,11 @@ export default function About() {
         <li>ยังไม่ยืนยันว่าร้านยังเปิดกิจการ การสุ่มตรวจ 50 ร้านดูเพียงชื่อ หมวด และตำแหน่งว่าน่าจะเป็นร้านอาหาร</li>
         <li>ไม่นำเข้าเบอร์โทร เพราะอาจเป็นเบอร์ส่วนตัวของเจ้าของร้าน</li>
       </ul>
+      <h2>วัดผลแล้วแค่ไหน</h2>
+      <p>
+        วัดเฉพาะระบบกฎบนคำถาม dev 40 ข้อ ได้ slot F1 micro 0.953 และ macro 0.934 ตัวเลขนี้มองในแง่ดี เพราะผู้ร่างคำถามกับผู้เขียนกฎเป็นผู้ช่วย AI ตัวเดียวกัน
+        และใช้ชุดนี้แก้บั๊กด้วย ชุด test 80 ข้อและ Gemini ยังไม่ได้วัด
+      </p>
       <h2>ความเป็นส่วนตัว</h2>
       <ul>
         <li>ไม่ต้องสมัครสมาชิก ตำแหน่งใช้เมื่อกด “ใกล้ฉัน” ปัดเหลือราว 100 เมตรก่อนส่ง และไม่บันทึก</li>
