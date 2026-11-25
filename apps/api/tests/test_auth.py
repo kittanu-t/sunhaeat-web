@@ -5,16 +5,32 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-from app.auth import sign
+from app.auth import sign, signed_target
 from app.main import create_app
 from app.settings import Settings
+from testsupport.api import SECRET, SignedClient
 
-VECTORS = json.loads((pathlib.Path(__file__).parents[3] / "tests/fixtures/hmac.json").read_text(encoding="utf8"))
+FIXTURES = pathlib.Path(__file__).parents[3] / "tests/fixtures"
+VECTORS = json.loads((FIXTURES / "hmac.json").read_text(encoding="utf8"))
+TARGETS = json.loads((FIXTURES / "signed-targets.json").read_text(encoding="utf8"))
 
 
 @pytest.mark.parametrize("v", VECTORS, ids=lambda v: v["name"])
 def test_signature_matches_shared_vectors(v):
     assert sign(v["secret"], v["ts"], v["method"], v["target"], v["session"], v["ip"], v["body"].encode()) == v["signature"]
+
+
+@pytest.mark.parametrize("t", TARGETS, ids=lambda t: t["name"])
+def test_signed_target_matches_shared_vectors(t):
+    assert signed_target(t["path"], t["query"].encode()) == t["target"]
+
+
+@pytest.mark.parametrize("sent,arrives", [("q=som+tam", "q=som%20tam"), ("q=%7E%21%28%29", "q=~!()")])
+def test_query_rewritten_by_the_host_is_still_accepted(sent, arrives):
+    c = SignedClient(create_app(Settings(_env_file=None, api_hmac_secret=SECRET)))
+    h = c.headers("GET", signed_target("/v1/nope", sent.encode()))
+    assert c.http.get(f"/v1/nope?{arrives}", headers=h).status_code == 404  # signed, but no such route
+    assert c.http.get(f"/v1/nope?{arrives}x", headers=h).status_code == 401
 
 
 def test_signed_request_is_accepted(api):

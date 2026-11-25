@@ -1,0 +1,44 @@
+[
+  {
+    "name": "space sent as plus",
+    "path": "/v1/places",
+    "query": "limit=1&q=som+tam",
+    "target": "/v1/places?limit=1&q=som%20tam"
+  },
+  {
+    "name": "space sent as percent 20",
+    "path": "/v1/places",
+    "query": "limit=1&q=som%20tam",
+    "target": "/v1/places?limit=1&q=som%20tam"
+  },
+  {
+    "name": "marks escaped",
+    "path": "/v1/places",
+    "query": "q=%7E%21%28%29%27*-._",
+    "target": "/v1/places?q=~!()'*-._"
+  },
+  {
+    "name": "marks left alone",
+    "path": "/v1/places",
+    "query": "q=~!()'*-._",
+    "target": "/v1/places?q=~!()'*-._"
+  },
+  {
+    "name": "delimiters stay escaped and keep their order",
+    "path": "/v1/places",
+    "query": "tag=b&tag=a&q=%2B%26%3D%25&demo=",
+    "target": "/v1/places?tag=b&tag=a&q=%2B%26%3D%25&demo="
+  },
+  {
+    "name": "Thai path and query",
+    "path": "/v1/places/ร้าน-1",
+    "query": "q=%E0%B8%95%E0%B8%B3",
+    "target": "/v1/places/ร้าน-1?q=%E0%B8%95%E0%B8%B3"
+  },
+  {
+    "name": "no query",
+    "path": "/v1/places",
+    "query": "",
+    "target": "/v1/places"
+  }
+]

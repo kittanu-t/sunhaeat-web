@@ -2,6 +2,7 @@
 import hashlib
 import hmac
 import time
+from urllib.parse import parse_qsl, quote
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -10,8 +11,18 @@ MAX_SKEW_S = 60
 MAX_BODY_BYTES = 16_384
 
 
+def signed_target(path: str, query: bytes) -> str:
+    """Percent-decoded path plus the query's decoded pairs, escaped the one way encodeURIComponent does.
+
+    Hosts rewrite the raw query in transit ("+" becomes "%20", "%7E" becomes "~"), so it cannot be signed as sent.
+    """
+    pairs = parse_qsl(query.decode("latin-1"), keep_blank_values=True)  # the same parse the routes see
+    encoded = "&".join("=".join(quote(part, safe="!~*'()") for part in pair) for pair in pairs)
+    return path + (f"?{encoded}" if encoded else "")
+
+
 def sign(secret: str, ts: str, method: str, target: str, session: str, ip: str, body: bytes) -> str:
-    """target is the percent-decoded path plus "?" and the raw query string, if any."""
+    """target comes from signed_target."""
     message = "\n".join([ts, method, target, session, ip, hashlib.sha256(body).hexdigest()])
     return hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
 
@@ -36,8 +47,7 @@ def install_auth(app: FastAPI) -> None:
             return JSONResponse({"detail": "body_too_large"}, 413)
         h = request.headers
         ts, session, ip = h.get("x-she-timestamp", ""), h.get("x-she-session", ""), h.get("x-she-ip", "")
-        query = request.scope["query_string"].decode("latin-1")
-        target = request.scope["path"] + (f"?{query}" if query else "")
+        target = signed_target(request.scope["path"], request.scope["query_string"])
         expected = sign(secret, ts, request.method, target, session, ip, body)
         fresh = ts.isascii() and ts.isdigit() and abs(time.time() - int(ts)) <= MAX_SKEW_S
         # Compare bytes: compare_digest rejects non-ASCII strings with an exception.

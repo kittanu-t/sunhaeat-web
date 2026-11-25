@@ -10,7 +10,17 @@ export class ApiError extends Error {
   }
 }
 
-/** target is the percent-decoded path plus "?" and the raw query string, if any. */
+/**
+ * Percent-decoded path plus the query's decoded pairs, escaped one way. Hosts rewrite the raw query in transit
+ * ("+" becomes "%20", "%7E" becomes "~"), so it cannot be signed as sent.
+ */
+export function signedTarget(path: string): string {
+  const [pathname, query] = path.split("?", 2);
+  const encoded = [...new URLSearchParams(query)].map((pair) => pair.map(encodeURIComponent).join("=")).join("&");
+  return decodeURIComponent(pathname) + (encoded && `?${encoded}`);
+}
+
+/** target comes from signedTarget. */
 export function sign(secret: string, ts: string, method: string, target: string, session: string, ip: string, body: string): string {
   const digest = createHash("sha256").update(body).digest("hex");
   return createHmac("sha256", secret).update([ts, method, target, session, ip, digest].join("\n")).digest("hex");
@@ -33,8 +43,7 @@ export async function callApi<T extends z.ZodType>(schema: T, path: string, call
   const base = process.env.API_BASE_URL;
   const secret = process.env.API_HMAC_SECRET;
   if (!base || !secret) throw new ApiError(503, "not_configured");
-  const [pathname, query] = path.split("?", 2);
-  const target = decodeURIComponent(pathname) + (query ? `?${query}` : "");
+  const target = signedTarget(path);
   const text = body === undefined ? "" : JSON.stringify(body);
   const ts = String(Math.floor(Date.now() / 1000));
   let response: Response;

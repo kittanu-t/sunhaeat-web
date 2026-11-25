@@ -9,7 +9,7 @@ import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
-from app.auth import sign
+from app.auth import sign, signed_target
 from app.main import create_app
 from app.search.normalize import normalize_name
 from app.settings import Settings
@@ -44,7 +44,7 @@ class SignedClient:
 
     def get(self, path, **params):
         query = "?" + urlencode(params) if params else ""
-        return self.http.get(path + query, headers=self.headers("GET", unquote(path) + query))
+        return self.http.get(path + query, headers=self.headers("GET", signed_target(unquote(path), query[1:].encode())))
 
     def post(self, path, payload):
         body = json.dumps(payload).encode()

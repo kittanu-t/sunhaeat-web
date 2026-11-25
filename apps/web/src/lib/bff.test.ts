@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import vectors from "../../../../tests/fixtures/hmac.json";
+import targets from "../../../../tests/fixtures/signed-targets.json";
 import { POST as chatFree } from "@/app/api/chat/free/route";
 import { POST as chatGuided } from "@/app/api/chat/guided/route";
 import { GET as getMeta } from "@/app/api/meta/route";
@@ -8,7 +9,7 @@ import { POST as postNear } from "@/app/api/near/route";
 import { GET as getPlace } from "@/app/api/places/[slug]/route";
 import { GET as getPlaces } from "@/app/api/places/route";
 import { POST as createSession } from "@/app/api/session/route";
-import { sign } from "@/lib/api";
+import { sign, signedTarget } from "@/lib/api";
 import { ipHash, issueSession, readSession } from "@/lib/session";
 
 const ORIGIN = "https://sunhaeat.test";
@@ -54,6 +55,17 @@ const header = (name: string) => new Headers(upstream[0].init.headers).get(name)
 describe("request signing", () => {
   it.each(vectors)("matches the API vector: $name", (v) => {
     expect(sign(v.secret, v.ts, v.method, v.target, v.session, v.ip, v.body)).toBe(v.signature);
+  });
+
+  it.each(targets)("builds the API target: $name", ({ path, query, target }) => {
+    expect(signedTarget(encodeURI(path) + (query && `?${query}`))).toBe(target);
+  });
+
+  it("signs a search with a space in the form every host preserves", async () => {
+    await getPlaces(new Request(`${ORIGIN}/api/places?q=som%20tam`));
+    expect(upstream[0].url).toBe("https://api.test/v1/places?q=som+tam");
+    expect(header("x-she-signature")).toBe(
+      sign("hmac-secret", header("x-she-timestamp")!, "GET", "/v1/places?q=som%20tam", "anonymous", header("x-she-ip")!, ""));
   });
 
   it("signs the decoded Thai path it calls", async () => {
