@@ -6,7 +6,7 @@ Built as an NLP/AI portfolio project. A successor to an earlier LINE bot of the 
 
 **Live demo: <https://web-mu-seven-37.vercel.app>**
 
-> Status: release 1 is deployed on free tiers. Search, near me and place pages are checked on the live site; live chat and Gemini are not yet. Gemini has not been evaluated; see [Evaluation](#evaluation).
+> Status: release 1 is deployed on free tiers. Search, near me and place pages are checked on the live site; both chat modes and one Gemini call have been tried there by hand. Gemini is evaluated on the dev split only; see [Evaluation](#evaluation).
 
 ## What it does
 
@@ -64,7 +64,7 @@ Configuration is listed in [.env.example](.env.example). Deployment and recovery
 
 ## Evaluation
 
-Only the rules system has been measured, and only on the 46-question **dev** split that was also used to fix parser bugs (slot F1 micro 0.953, macro 0.934 on 20 questions; four questions showed places that break what was really asked). Questions were drafted by the same assistant that wrote the rules and have not been reviewed by a person, so these numbers are optimistic. The 80-question test split is untouched. Details and limits: [eval-r1](docs/evidence/eval-r1.md).
+Only the 46-question **dev** split has been run, and it was also used to fix parser bugs. On its 20 slot questions, rules alone reach F1 micro 0.953 / macro 0.934 and rules plus `gemini-3.5-flash-lite` 0.989 / 0.990 (one run, commit f204ffe). Questions answered with places that break the request: 4 with rules, 0 with Gemini, which shows fewer places. Gemini failed on 5 of the 21 questions sent to it and those answers fell back to rules. Questions were drafted by the same assistant that wrote the rules and have not been reviewed by a person, so these numbers are optimistic. The 80-question test split is untouched. Details and limits: [eval-r1](docs/evidence/eval-r1.md).
 
 ## Performance
 

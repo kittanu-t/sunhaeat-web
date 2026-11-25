@@ -1,6 +1,6 @@
 # Operations
 
-State on 2026-11-25: steps 1–3, 5 and 6 are done (Supabase Singapore, two Vercel projects). Step 4 is not checked.
+State on 2026-11-25: steps 1–3, 5 and 6 are done (Supabase Singapore, two Vercel projects). Step 4: `gemini-3.5-flash-lite` answers; account limits are read by the owner.
 
 ## First deployment
 
@@ -18,7 +18,7 @@ State on 2026-11-25: steps 1–3, 5 and 6 are done (Supabase Singapore, two Verc
 - Six quick chat messages: the sixth is refused. `AI_ENABLED=false`: both modes still answer.
 - No secret appears in the browser bundle. Lighthouse mobile is at least 85. A phone in a private window goes from home to a recommendation without signing in.
 
-Passed on the live site, 2026-11-25 (commit 69ef4b6): the first line above; forged cookie, wrong Turnstile token and wrong cron bearer refused; Thai search, search with spaces, near me, nearby, unknown place 404; no secret names or keys in the chat page bundle; Lighthouse. Not yet checked: live chat after Turnstile, the sixth-message limit, Gemini, the real cron run, a phone in a private window.
+Passed on the live site, 2026-11-25 (commit 69ef4b6): the first line above; forged cookie, wrong Turnstile token and wrong cron bearer refused; Thai search, search with spaces, near me, nearby, unknown place 404; no secret names or keys in the chat page bundle; Lighthouse. Tried by hand on the live site: both chat modes after Turnstile, one Gemini answer. Not yet checked: the sixth-message limit, the real cron run, a phone in a private window.
 
 ## When something stops
 
