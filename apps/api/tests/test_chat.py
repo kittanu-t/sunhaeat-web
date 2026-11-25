@@ -239,3 +239,20 @@ def test_accounting_failure_after_an_answer_does_not_lose_it(chat, monkeypatch):
     monkeypatch.setattr(free, "settle", broken)
     ids = [str(uuid.uuid5(uuid.NAMESPACE_URL, "tam-1"))]
     assert ask(chat({"tags": ["isan"]}, {"ids": ids}), "แนะนำหน่อย")["mode"] == "ai"
+
+
+def test_model_words_found_in_no_name_do_not_hide_the_food_type(chat):
+    c = chat({"province_code": "TH-40", "tags": ["isan"], "terms": ["ร้อน ๆ"]}, {"ids": [str(uuid.uuid5(uuid.NAMESPACE_URL, "tam-2"))]})
+    r = ask(c, "อยากกินอะไรร้อน ๆ ขอนแก่น")
+    assert r["mode"] == "ai" and [p["slug"] for p in r["result"]["matched"]] == ["tam-2"]
+    assert r["partial"] is True and r["filters"]["terms"] == [] and "ที่ตรงเงื่อนไข" not in r["text"]
+
+
+def test_model_words_found_in_a_name_still_narrow_the_answer(chat):
+    r = ask(chat({"province_code": "TH-40", "tags": ["isan"], "terms": ["ร้าน 3"]}), "อยากกินอะไรแซ่บๆ ขอนแก่น")
+    assert [p["slug"] for p in r["result"]["matched"]] == ["tam-3"] and r["partial"] is False
+
+
+def test_unknown_dish_without_a_food_type_is_not_found_rather_than_anything_nearby(chat):
+    r = ask(chat({"province_code": "TH-40", "terms": ["พิซซ่าเตาถ่าน"]}), "อยากกินอะไรแปลก ๆ ขอนแก่น")
+    assert r["mode"] == "ai" and r["result"]["matched"] == [] and "ยังไม่พบ" in r["text"]

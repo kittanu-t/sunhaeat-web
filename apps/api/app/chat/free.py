@@ -96,6 +96,15 @@ def _find(pool: ConnectionPool, filters: Filters) -> SearchResult:
         return search(cur, filters)
 
 
+def _find_with_terms(pool: ConnectionPool, filters: Filters) -> tuple[Filters, SearchResult]:
+    """Terms must appear in a place's name; when none does, keep the food type and say the rest was not applied."""
+    result = _find(pool, filters)
+    if filters.terms and filters.tags and not (result.matched or result.maybe):
+        filters = filters.model_copy(update={"terms": [], "needs_clarification": True})
+        result = _find(pool, filters)
+    return filters, result
+
+
 def _rules_reply(pool: ConnectionPool, rules: Filters, **why) -> ChatReply:
     if not _usable(rules):
         return ChatReply(mode="rules", text=CLARIFY, filters=rules, result=SearchResult(), **why)
@@ -139,7 +148,7 @@ def _answer(pool: ConnectionPool, settings: Settings, transport: Transport | Non
         filters = _merge(client.parse(text, history), rules)
         if not _usable(filters) and not filters.terms:
             return ChatReply(mode="ai", text=CLARIFY, filters=filters, result=SearchResult())
-        result = _find(pool, filters)
+        filters, result = _find_with_terms(pool, filters)
         candidates = result.matched + result.maybe
         if len(candidates) > 3 and time.monotonic() + settings.ai_timeout_s < deadline:
             result = _pick(result, client.select(text, candidates))

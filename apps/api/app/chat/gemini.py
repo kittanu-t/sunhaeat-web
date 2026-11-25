@@ -87,7 +87,10 @@ _PARSE = (
     "Set needs_clarification when the request is about allergies, diet, hygiene, parking, taste or opening times, or is unclear. "
     f"Tags: {json.dumps(LABELS, ensure_ascii=False)}. "
     f"Province codes: {json.dumps({code: names[0] for code, names in PROVINCES.items()}, ensure_ascii=False)} (TH-42 is เลย). "
-    "budget_per_person is Thai baht per person."
+    "budget_per_person is Thai baht per person. "
+    "terms: only a specific dish or ingredient that no tag covers, as written in a restaurant's name; never adjectives, "
+    "temperatures, moods or amounts. For a craving without a named dish, choose every tag that fits, such as noodle, "
+    "hotpot_grill and congee for something hot; if none fits, set needs_clarification."
 )
 _SELECT = (
     f"Choose up to {MAX_SELECTED} IDs from `places` that best fit `text`, best first. Return JSON only. "
