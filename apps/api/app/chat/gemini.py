@@ -6,7 +6,6 @@ from concurrent.futures import TimeoutError as FutureTimeout
 from typing import Annotated, Protocol
 from uuid import UUID
 
-import httpx
 from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel, Field, ValidationError
@@ -21,7 +20,7 @@ MAX_CANDIDATES = 10
 MAX_SELECTED = 3
 
 # The SDK logs request bodies at debug level; keep chat text out of logs.
-for noisy in ("google_genai", "httpx", "httpcore"):
+for noisy in ("google_genai", "httpx2", "httpcore2", "httpx", "httpcore"):
     logging.getLogger(noisy).setLevel(logging.WARNING)
 
 _executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="gemini")
@@ -77,9 +76,7 @@ class SdkTransport:
             )
         except errors.APIError as e:
             raise ProviderError(code_for(e)) from None
-        except httpx.TimeoutException:
-            raise ProviderError("timeout") from None
-        except Exception:
+        except Exception:  # GeminiClient has already reported anything slow enough to time out here
             raise ProviderError("upstream") from None
         return r.text or "", (r.usage_metadata.total_token_count if r.usage_metadata else 0) or 0
 
