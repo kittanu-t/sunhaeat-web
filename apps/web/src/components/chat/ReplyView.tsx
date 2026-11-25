@@ -43,8 +43,10 @@ export function ReplyView({ reply }: { reply: ChatReply }) {
         </section>
       ))}
       <p className="muted">
-        {reply.mode === "ai" ? "AI ช่วยอ่านคำถามและเลือกลำดับ ข้อมูลร้านมาจากฐานข้อมูล" : "คำตอบนี้มาจากกฎ ไม่ได้ใช้ AI"}
-        {reply.ai_unavailable && <> <span>{WHY[reply.ai_unavailable]}</span></>}
+        {reply.mode === "rules" ? "คำตอบนี้มาจากกฎ ไม่ได้ใช้ AI"
+          : reply.ai_unavailable ? "AI ช่วยอ่านคำถาม ข้อมูลและลำดับร้านมาจากฐานข้อมูล"
+          : "AI ช่วยอ่านคำถามและเลือกลำดับ ข้อมูลร้านมาจากฐานข้อมูล"}
+        {reply.mode === "rules" && reply.ai_unavailable && <> <span>{WHY[reply.ai_unavailable]}</span></>}
       </p>
       {lanes.some(([, places]) => places.length > 0) && <p className="muted">{reply.disclaimer}</p>}
     </div>

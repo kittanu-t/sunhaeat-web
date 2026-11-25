@@ -1,6 +1,7 @@
 """Gemini is used only to read the question and pick from supplied IDs. Its prose never reaches the user."""
 import json
 import logging
+import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 from typing import Annotated, Protocol
@@ -15,6 +16,7 @@ from app.search.parse import PROVINCES
 from app.search.tags import LABELS, TAGS
 
 MAX_CALLS = 2
+RETRY_DELAY_S = 0.5
 MAX_OUTPUT_TOKENS = 512
 MAX_CANDIDATES = 10
 MAX_SELECTED = 3
@@ -27,7 +29,7 @@ _executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="gemini")
 
 
 class ProviderError(Exception):
-    """code: timeout, quota, auth, schema, upstream or call_limit. Never carries provider text."""
+    """code: timeout, quota, auth, busy, schema, upstream or call_limit. Never carries provider text."""
 
     def __init__(self, code: str):
         super().__init__(code)
@@ -56,7 +58,7 @@ def code_for(error: errors.APIError) -> str:
         return "quota"
     if error.code in (401, 403) or (error.code == 400 and "api key" in (error.message or "").lower()):
         return "auth"
-    return "upstream"
+    return "busy" if error.code == 503 else "upstream"
 
 
 class SdkTransport:
@@ -128,7 +130,14 @@ class GeminiClient:
             raise ProviderError("schema") from None
 
     def parse(self, text: str, history: list[str]) -> Filters:
-        raw = self._ask(_PARSE, {"text": text, "earlier_messages": history}, _filters_schema(), ModelFilters)
+        question = (_PARSE, {"text": text, "earlier_messages": history}, _filters_schema(), ModelFilters)
+        try:
+            raw = self._ask(*question)
+        except ProviderError as e:
+            if e.code != "busy":
+                raise
+            time.sleep(RETRY_DELAY_S)  # free-tier overload passes quickly; this uses up the ranking call
+            raw = self._ask(*question)
         try:
             return Filters(**raw.model_dump())
         except ValidationError:

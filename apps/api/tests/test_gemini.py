@@ -67,6 +67,20 @@ def test_third_call_is_refused():
     assert e.value.code == "call_limit"
 
 
+def test_busy_parse_is_tried_once_more():
+    c = GeminiClient(Fake(ProviderError("busy"), {"tags": ["isan"]}))
+    assert c.parse("x", []).tags == ["isan"] and c.calls == 2
+
+
+@pytest.mark.parametrize("replies,code", [
+    (["busy", "busy"], "busy"), (["upstream"], "upstream"), (["quota"], "quota")])
+def test_parse_retries_only_when_busy_and_only_once(replies, code):
+    fake = Fake(*map(ProviderError, replies), {"tags": ["isan"]})
+    with pytest.raises(ProviderError) as e:
+        GeminiClient(fake).parse("x", [])
+    assert e.value.code == code and len(fake.calls) == len(replies)
+
+
 def test_select_keeps_only_offered_ids_in_order():
     a, b = place("ก"), place("ข")
     assert GeminiClient(Fake({"ids": [str(b.id), str(a.id)]})).select("x", [a, b]) == [b.id, a.id]
@@ -90,7 +104,7 @@ def test_user_text_and_place_names_stay_in_the_data_payload():
 
 
 @pytest.mark.parametrize("status,code", [
-    (429, "quota"), (401, "auth"), (403, "auth"), (400, "upstream"), (500, "upstream"), (503, "upstream")])
+    (429, "quota"), (401, "auth"), (403, "auth"), (400, "upstream"), (500, "upstream"), (503, "busy")])
 def test_http_errors_map_to_codes(status, code):
     assert code_for(errors.APIError(status, {"error": {"message": "secret detail", "status": "X"}})) == code
 

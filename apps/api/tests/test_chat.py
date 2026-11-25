@@ -81,7 +81,21 @@ def test_provider_fault_falls_back_to_rules(chat, reply, delay):
 
 def test_model_cannot_invent_ids(chat):
     r = ask(chat({"tags": ["isan"]}, {"ids": [str(uuid.uuid4())]}), "ส้มตำ", ["สวัสดี"])
-    assert r["mode"] == "rules" and r["result"]["matched"]
+    assert [p["slug"] for p in r["result"]["matched"]] == [f"tam-{i}" for i in range(5)]
+    assert r["mode"] == "ai" and r["ai_unavailable"] == "error" and r["ai_code"] == "schema"
+
+
+@pytest.mark.parametrize("code", ["busy", "upstream", "quota"])
+def test_failed_ranking_keeps_what_the_model_understood(chat, code):
+    r = ask(chat({"province_code": "TH-40", "budget_per_person": 100}, ProviderError(code)), "งบร้อยเดียวกินอะไรดีขอนแก่น")
+    assert r["mode"] == "ai" and r["filters"]["budget_per_person"] == 100 and len(r["result"]["maybe"]) == 5
+    assert r["ai_unavailable"] == "error" and r["ai_code"] == code
+
+
+def test_retried_parse_leaves_no_call_for_ranking(chat):
+    c = chat(ProviderError("busy"), {"tags": ["isan"]}, {"ids": []})
+    r = ask(c, "อยากกินอะไรแซ่บๆ")
+    assert len(c.fake.calls) == 2 and r["mode"] == "ai" and len(r["result"]["matched"]) == 5 and r["ai_code"] == "busy"
 
 
 def test_fallback_with_nothing_usable_asks_back(chat):
@@ -99,6 +113,12 @@ def test_quota_error_blocks_further_model_calls(chat):
     ask(c, "แนะนำหน่อย")
     ask(c, "แนะนำหน่อย")
     assert len(c.fake.calls) == 1
+
+
+def test_quota_error_while_ranking_blocks_further_model_calls(chat):
+    c = chat({"tags": ["isan"]}, ProviderError("quota"), {"tags": ["isan"]})
+    assert ask(c, "แนะนำหน่อย")["mode"] == "ai"
+    assert ask(c, "แนะนำหน่อย")["ai_unavailable"] == "limit" and len(c.fake.calls) == 2
 
 
 def test_daily_session_limit_falls_back(chat):

@@ -8,7 +8,7 @@ import psycopg
 from psycopg_pool import ConnectionPool, PoolTimeout
 from pydantic import BaseModel
 
-from app.chat.gemini import GeminiClient, ProviderError, Transport
+from app.chat.gemini import MAX_CALLS, GeminiClient, ProviderError, Transport
 from app.chat.quota import Limits, block_ai, reserve, settle
 from app.models import Filters, Place, SearchResult
 from app.search.parse import parse_rules, requires_verified_details
@@ -31,7 +31,7 @@ class ChatReply(BaseModel):
     result: SearchResult
     disclaimer: str = DISCLAIMER
     partial: bool = False  # some of what was asked could not be applied
-    ai_unavailable: Literal["off", "limit", "error"] | None = None
+    ai_unavailable: Literal["off", "limit", "error"] | None = None  # with mode "ai": understood, but not ranked by AI
     ai_code: str | None = None
 
 
@@ -116,6 +116,12 @@ def _rules_reply(pool: ConnectionPool, rules: Filters, **why) -> ChatReply:
     return ChatReply(mode="rules", text=text, filters=rules, result=result, partial=partial, **why)
 
 
+def _stop_if_refused(pool: ConnectionPool, now: datetime, code: str) -> None:
+    if code in ("quota", "auth"):
+        with pool.connection() as conn:
+            block_ai(conn, now)
+
+
 def answer_free(pool: ConnectionPool, settings: Settings, transport: Transport | None, text: str, history: list[str],
                 session: str, ip: str) -> ChatReply:
     reply = _answer(pool, settings, transport, text, history, session, ip)
@@ -150,14 +156,24 @@ def _answer(pool: ConnectionPool, settings: Settings, transport: Transport | Non
             return ChatReply(mode="ai", text=CLARIFY, filters=filters, result=SearchResult())
         filters, result = _find_with_terms(pool, filters)
         candidates = result.matched + result.maybe
-        if len(candidates) > 3 and time.monotonic() + settings.ai_timeout_s < deadline:
-            result = _pick(result, client.select(text, candidates))
+        unranked = None
+        if len(candidates) > 3:
+            # Ranking is optional: without it, what the model understood still stands, in database order.
+            if client.calls >= MAX_CALLS:
+                unranked = "busy"
+            elif time.monotonic() + settings.ai_timeout_s >= deadline:
+                unranked = "timeout"
+            else:
+                try:
+                    result = _pick(result, client.select(text, candidates))
+                except ProviderError as e:
+                    unranked = e.code
+                    _stop_if_refused(pool, now, e.code)
         return ChatReply(mode="ai", text=describe(result, filters.needs_clarification), filters=filters,
-                         result=result, partial=filters.needs_clarification)
+                         result=result, partial=filters.needs_clarification,
+                         ai_unavailable="error" if unranked else None, ai_code=unranked)
     except ProviderError as e:
-        if e.code in ("quota", "auth"):
-            with pool.connection() as conn:
-                block_ai(conn, now)
+        _stop_if_refused(pool, now, e.code)
         return _rules_reply(pool, rules, ai_unavailable="error", ai_code=e.code)
     finally:
         try:
