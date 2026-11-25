@@ -4,7 +4,9 @@
 
 Built as an NLP/AI portfolio project. A successor to an earlier LINE bot of the same name, with new data, a new stack and a web security design. It is not affiliated with any restaurant listed.
 
-> Status: release 1 is built and tested locally. Not deployed yet. Gemini has not been evaluated yet; see [Evaluation](#evaluation).
+**Live demo: <https://web-mu-seven-37.vercel.app>**
+
+> Status: release 1 is deployed on free tiers. Search, near me and place pages are checked on the live site; live chat and Gemini are not yet. Gemini has not been evaluated; see [Evaluation](#evaluation).
 
 ## What it does
 
@@ -64,9 +66,9 @@ Configuration is listed in [.env.example](.env.example). Deployment and recovery
 
 Only the rules system has been measured, and only on the 46-question **dev** split that was also used to fix parser bugs (slot F1 micro 0.953, macro 0.934 on 20 questions; four questions showed places that break what was really asked). Questions were drafted by the same assistant that wrote the rules and have not been reviewed by a person, so these numbers are optimistic. The 80-question test split is untouched. Details and limits: [eval-r1](docs/evidence/eval-r1.md).
 
-## Measured locally
+## Performance
 
-Lighthouse 12 mobile, three runs each on the production build with the real dataset: home 93/94/94, real place page 97/96/96, demo place page 96/97/96, chat 96/95/95; accessibility 100 on all four. Phones load the map only when asked. Hosted numbers will differ.
+Lighthouse 12.8.2 mobile performance, three runs each on the live site (commit 69ef4b6, 2026-11-25, one machine): home 100/98/98, real place page 99/99/99, demo place page 99/99/99, chat 98/98/98; accessibility 100 in every run. The same build measured locally earlier: 93–97. Phones load the map only when asked.
 
 ## Data and licences
 
