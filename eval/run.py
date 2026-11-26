@@ -55,9 +55,14 @@ class CountingTransport:
         return text, tokens
 
 
+def usable(row: dict, split: str) -> bool:
+    """In this split and not dropped by the human review."""
+    return row["split"] == split and not row.get("excluded", False)
+
+
 def load(split: str) -> list[dict]:
     rows = [json.loads(line) for line in QUESTIONS.read_text(encoding="utf8").splitlines()]
-    return [r for r in rows if r["split"] == split]
+    return [r for r in rows if usable(r, split)]
 
 
 def shown(reply) -> list[dict]:
