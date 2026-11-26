@@ -6,7 +6,7 @@ Built as an NLP/AI portfolio project. A successor to an earlier LINE bot of the 
 
 **Live demo: <https://web-mu-seven-37.vercel.app>**
 
-> Status: release 1 is deployed on free tiers. Search, near me and place pages are checked on the live site; both chat modes and one Gemini call have been tried there by hand. Gemini is evaluated on the dev split only; see [Evaluation](#evaluation).
+> Status: release 1 is deployed on free tiers. Search, near me and place pages are checked on the live site; both chat modes and Gemini have been tried there by hand. Rules and Gemini are evaluated on a held-out test split; see [Evaluation](#evaluation).
 
 ## What it does
 
@@ -64,7 +64,16 @@ Configuration is listed in [.env.example](.env.example). Deployment and recovery
 
 ## Evaluation
 
-Only the 46-question **dev** split has been run, and it was also used to fix parser bugs. On its 20 slot questions, rules alone reach F1 micro 0.953 / macro 0.934 and rules plus `gemini-3.5-flash-lite` 0.989 / 0.990 (one run, commit f204ffe). Questions answered with places that break the request: 4 with rules, 0 with Gemini, which shows fewer places. Gemini failed on 5 of the 21 questions sent to it and those answers fell back to rules. Questions were drafted by the same assistant that wrote the rules and have not been reviewed by a person, so these numbers are optimistic. The 80-question test split is untouched. Details and limits: [eval-r1](docs/evidence/eval-r1.md).
+126 Thai questions, split into dev (46, used while building) and test (80, run once per system after the labels were reviewed). On the 40 test questions that ask for a province, food type or budget:
+
+| Test split | Rules | Rules + `gemini-3.5-flash-lite` |
+|---|---:|---:|
+| Slot F1 micro / macro | 0.940 / 0.891 | **0.983 / 0.970** |
+| Questions with every slot right | 31/40 | **38/40** |
+| Questions showing places that break the request | 8 | 1 |
+| Prompt-injection questions still read correctly | 7/7 | 6/7 |
+
+Restaurant-name lookup (20/20) and declining questions the data cannot answer (13/13) were the same for both. Gemini was called for 23 of the 80 questions; the rest were answered by rules alone. One run at temperature 0.2, commit d2381f0, latency measured from a laptop in Thailand (median 3.2 s when Gemini is used). Gemini usually shows at most 3 places, so its lower violation count is partly that. In one injection question the model copied a fake restaurant name into the filter and found nothing. The questions and draft labels were written by the same assistant that wrote the rules; the owner reviewed all 126 and changed none. Details and limits: [eval-r1](docs/evidence/eval-r1.md).
 
 ## Performance
 
